@@ -116,6 +116,13 @@ body[data-screen="home"] .bar-link { visibility: hidden; }
 main { max-width: 720px; margin: 0 auto; padding: 18px 16px 120px; outline: none; }
 .noscript { text-align: center; padding: 3rem 16px; }
 
+/* Part of junkdrawer.works, under every screen but the printable one */
+.jd-foot { max-width: 720px; margin: 0 auto; padding: 4px 16px calc(20px + env(safe-area-inset-bottom)); text-align: center; font-size: .85rem; color: var(--ink-2); }
+.jd-foot a { text-decoration: none; }
+.jd-foot a:hover, .jd-foot a:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
+.jd-foot span { margin: 0 6px; }
+body[data-screen="p"] .jd-foot { display: none; }
+
 /* Buttons */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
@@ -560,7 +567,7 @@ body[data-screen="p"] main { max-width: 9.2in; }
 @page { size: letter; margin: .4in; }
 @media print {
   body { background: #fff; }
-  .bar, .print-tools, .toast, .sheet, .noscript { display: none !important; }
+  .bar, .print-tools, .toast, .sheet, .noscript, .jd-foot { display: none !important; }
   main { max-width: none; padding: 0; margin: 0; }
   .paper { box-shadow: none; padding: 0; border-radius: 0; overflow: visible; }
   .p-grid tbody { break-inside: avoid; }
