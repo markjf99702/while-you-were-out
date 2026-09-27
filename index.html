@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>While You Were Out</title>
+  <meta name="description" content="A care sheet for the dog sitter, house sitter or babysitter: feeding, meds, walks, the vet, the Wi-Fi and who to call. Send it as a link or print it for the fridge. The sitter ticks jobs off as they go and sends you notes back.">
+  <meta property="og:title" content="While You Were Out">
+  <meta property="og:description" content="A care sheet for the sitter, and notes back while you’re away.">
+  <meta property="og:image" content="https://junkdrawer.works/while-you-were-out/og.png">
+  <meta property="og:url" content="https://junkdrawer.works/while-you-were-out/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#f5f0e8" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1c1719" media="(prefers-color-scheme: dark)">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <link rel="preload" href="fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/public-sans.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/caveat.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/app.css">
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <header class="bar">
+    <a class="brand" href="#/">
+      <img src="icon.svg" alt="" width="30" height="30">
+      <span>While You Were Out</span>
+    </a>
+    <a class="bar-link" href="#/">All sheets</a>
+  </header>
+
+  <main id="app" tabindex="-1"></main>
+
+  <noscript><p class="noscript">While You Were Out needs JavaScript to show the care sheet.</p></noscript>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <dialog class="sheet" id="sheet">
+    <div class="sheet-body"></div>
+  </dialog>
+</body>
+</html>
