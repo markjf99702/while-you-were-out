@@ -110,7 +110,10 @@ function sheetRow(s) {
 function home() {
   document.title = 'While You Were Out';
   // A sheet started and left without a word typed isn't worth keeping.
-  for (const s of store.mine()) if (!s.title.trim() && !s.charges.length && !s.tasks.length && !s.owner.phone && !s.house.length) store.remove(s.id);
+  for (const s of store.mine()) {
+    const { id, v, created, updated, ...typed } = M.forLink(s);
+    if (!Object.keys(typed).length) store.remove(s.id);
+  }
   const mine = store.mine(), minding = store.minding();
   const unread = store.slips().filter(x => x.dir === 'in' && !x.read);
   app.innerHTML = `
