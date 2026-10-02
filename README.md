@@ -15,7 +15,7 @@
 ## How it works
 
 - **Make the sheet.** The dates you're away, your phone and where you'll be, then everyone you're leaving: dogs, cats, other pets and children. Each has notes with suggested labels (Food, Meds, Walks, Don't, Bedtime, Allergies…). Notes labelled Meds, Allergies, Health or Don't are flagged for the sitter.
-- **The words your dog knows.** Add the cue words and hand signals, or bring a dog in from [Trick Deck](https://junkdrawer.works/trick-deck/) with one tap. Both live on junkdrawer.works, so they share the browser's storage and the tricks your dog knows on cue come across by themselves.
+- **The words your dog knows.** Add the cue words and hand signals, or bring a dog in from [Trick Deck](https://trick-deck.junkdrawer.works/) with one tap, and the tricks your dog knows on cue come across by themselves. Trick Deck has its own address, so While You Were Out asks its `dogs.html` for them in a hidden frame, and uses the copy from before Trick Deck moved if it doesn't answer.
 - **The day.** Jobs in the morning, midday, evening, at bedtime or any time, with a time if it matters. A job can be every day, some weekdays (the mail on weekdays), or particular dates (the heartworm pill on the 5th, the bins on Sunday night). Tap a suggestion to add the usual ones for each animal or child.
 - **The house and who to call.** The Wi-Fi, getting in, the thermostat, trash day, the water shut-off and the breaker panel. Door and alarm codes are blurred until tapped. Contacts get Call and Text buttons, and addresses link to directions. Poison-control lines (US) are added for pets and children, and 911 is at the top.
 - **Send it.** The whole sheet goes in the link, squeezed with deflate, after the #, which browsers never send to a server. The sitter opens it and it's saved on their phone, where it works without signal. If you change something, send the link again. What they've ticked stays ticked, and an old link won't undo a newer one.
@@ -52,7 +52,7 @@ To put it online with GitHub Pages: **Settings → Pages → Build and deploymen
 - `js/app.js`: which screen goes with which address, the home screen, and opening links that arrive.
 - `js/edit.js`: making the sheet. `js/view.js`: the sheet as the sitter sees it. `js/slip.js`: the pink note, filling one in and reading one. `js/print.js`: the paper version. `js/send.js`: the send sheets.
 - `js/ui.js`: pieces every screen uses. `js/example.js`: the example (Biscuit, Olive and the house).
-- `js/trickdeck.js` and `js/cues.js`: reading dogs from Trick Deck, and each trick's cue word and hand signal.
+- `js/trickdeck.js` and `js/cues.js`: getting dogs from Trick Deck (which hands them over from its `dogs.html`), and each trick's cue word and hand signal.
 - `js/qr.js` draws QR codes with `js/vendor/qrcode.js`, Kazuhiko Arase's QR Code Generator (MIT).
 - `fonts/`: Barlow Condensed, Public Sans and Caveat, all under the SIL Open Font License, served from here so nothing loads from elsewhere.
 - `sw.js`: keeps a copy for using offline.

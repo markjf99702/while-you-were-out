@@ -3,7 +3,7 @@
 import * as M from './model.js';
 import { store } from './store.js';
 import { app, esc, on, go, toast, sheet as openSheet } from './ui.js';
-import { trickDeckDogs, bringIn } from './trickdeck.js';
+import { trickDeckDogs, bringIn, askTrickDeck } from './trickdeck.js';
 import { sendSheet } from './send.js';
 
 let current = null, timer = 0, focusNext = '';
@@ -266,6 +266,12 @@ function fit(el) {
 export function edit(s) {
   current = s;
   draw(s);
+  // Trick Deck's dogs come by asking it (see trickdeck.js). When they arrive, show them, unless someone's typing:
+  // then they show on the next redraw.
+  askTrickDeck().then(changed => {
+    const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName || '');
+    if (changed && current === s && app.querySelector('#etitle') && !typing) redraw();
+  });
   const input = e => {
     const path = e.target.dataset.b;
     if (!path) return;

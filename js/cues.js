@@ -1,5 +1,5 @@
 // The words and hand signals for Trick Deck's tricks, by trick id. Made by tools/trick-cues.mjs from Trick Deck's js/tricks.js.
-// Trick Deck (junkdrawer.works/trick-deck) keeps each dog's progress in this browser under 'trickdeck.v1'.
+// Trick Deck (trick-deck.junkdrawer.works) keeps each dog's progress in this browser under 'trickdeck.v1'.
 export const CUES = {
   "sit": ["Sit", "Sit", "Palm up, lift your hand from waist to chest."],
   "down": ["Down", "Down", "Flat palm, lower it toward the floor."],
