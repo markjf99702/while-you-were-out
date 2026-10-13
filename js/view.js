@@ -35,6 +35,9 @@ export function view(s, tab = 'today', dayArg = '') {
       <div class="next-bar">
         <a class="btn slip-btn wide" href="#/w/${s.id}/${day}">${s.example ? 'Try the note the sitter sends back' : `Leave ${esc(owner)} a note`}</a>
       </div>` : ''}`;
+  // On a long stay the day strip is wider than the screen: bring the day showing to the middle of it.
+  const strip = app.querySelector('.day-strip'), chip = strip?.querySelector('[aria-current]');
+  if (chip) strip.scrollLeft += chip.getBoundingClientRect().left - strip.getBoundingClientRect().left - (strip.clientWidth - chip.offsetWidth) / 2;
   on({
     change(e) {
       const id = e.target.dataset.tick;

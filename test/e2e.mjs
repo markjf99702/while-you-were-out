@@ -326,6 +326,25 @@ await A.check('#hideCodes');
 assert.equal(await A.locator('.paper:has-text("1954")').count(), 0, 'codes left off when asked');
 assert.equal(await A.locator('.paper:has-text("biscuit;2019")').count(), 0);
 
+// On a long stay the day strip is wider than the phone, and it opens on the day showing.
+const longId = await A.evaluate(() => {
+  const { M, store } = wywo, s = M.blankSheet();
+  Object.assign(s, { title: 'Three weeks', from: M.addDays(M.todayISO(), -11), to: M.addDays(M.todayISO(), 9), tasks: [M.newTask('morning', '', 'Feed the fish')] });
+  store.put(s);
+  return s.id;
+});
+const chipInView = () => A.evaluate(() => {
+  const strip = document.querySelector('.day-strip').getBoundingClientRect(), chip = document.querySelector('.day-strip [aria-current]').getBoundingClientRect();
+  return chip.left >= strip.left && chip.right <= strip.right;
+});
+await A.goto(`${base}#/v/${longId}/today`);
+await A.waitForSelector('.day-strip');
+assert.ok(await chipInView(), 'day 12 of 21 is out of sight in the strip');
+await A.click('.day-strip a:last-child');
+await A.waitForSelector('.day-strip a:last-child[aria-current]');
+assert.ok(await chipInView(), 'the last day, once tapped, is out of sight');
+await A.evaluate(id => wywo.store.remove(id), longId);
+
 // The example opens with a note already there.
 await A.goto(`${base}#/example`);
 await A.waitForSelector('.job');
