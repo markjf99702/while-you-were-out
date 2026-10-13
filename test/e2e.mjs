@@ -153,6 +153,7 @@ const sheetId = saved.id;
 
 await A.click('[data-act="send"]');
 const sheetUrl = await linkFromSheet(A);
+assert.equal(await A.getByRole('dialog', { name: 'Send it to Jess', exact: true }).count(), 1, 'the sheet that slides up is named by its heading');
 assert.match(await A.textContent('#sheet'), /Wi-Fi password and door or alarm codes/);
 await closeSheet(A);
 

@@ -33,6 +33,9 @@ export function sheet(html, bind) {
   const dlg = document.getElementById('sheet');
   const body = dlg.querySelector('.sheet-body');
   body.innerHTML = html;
+  // Its heading names it, for screen readers.
+  const h = body.querySelector('h2');
+  if (h) { h.id = 'sheetTitle'; dlg.setAttribute('aria-labelledby', 'sheetTitle'); } else dlg.removeAttribute('aria-labelledby');
   if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
   const close = () => (dlg.close ? dlg.close() : dlg.removeAttribute('open'));
   body.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', close));
