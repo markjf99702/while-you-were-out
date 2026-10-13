@@ -188,10 +188,12 @@ window.addEventListener('pagehide', flush);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flush(); else newDay(); });
 // A phone left on the sheet overnight still shows yesterday, and would file the morning's ticks under it.
 // When it's looked at on a new day, draw home or the sheet again, but not the editor or a note being written.
+// A day tapped in the strip stays, unless it was the day that was today: then the sheet moves on with it.
 function newDay() {
   if (document.visibilityState !== 'visible' || M.todayISO() === drawnOn) return;
-  const head = location.hash.replace(/^#\/?/, '').split('/')[0];
-  if (!head || head === 'v') route();
+  const [head, id, tab, day] = location.hash.replace(/^#\/?/, '').split('/');
+  if (head === 'v' && day === drawnOn) go(`/v/${id}/${tab}`, true);
+  else if (!head || head === 'v') route();
 }
 window.addEventListener('pageshow', newDay);
 window.addEventListener('focus', newDay);

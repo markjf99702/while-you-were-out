@@ -299,10 +299,23 @@ assert.doesNotMatch(await J.textContent('#toast'), /Updated/, 'the same link aga
   await N.locator('.job:has-text("Breakfast")').click();
   assert.equal(await N.evaluate(([id, d]) => Object.keys(wywo.store.ticks(id, d)).length, [sheetId, tomorrow]), 1, 'the morning’s tick goes under the new day');
   assert.match(await N.getAttribute('.next-bar a', 'href'), new RegExp(`/${tomorrow}$`));
+  // The same when today's day was tapped in the strip, so the address names it. Another day tapped there stays.
+  const inDays = n => iso(new Date(today.getFullYear(), today.getMonth(), today.getDate() + n));
+  await N.click('.day-strip a.is-today');
+  await N.waitForFunction(d => location.hash.endsWith(`/${d}`), tomorrow);
+  await N.clock.setFixedTime(new Date(`${inDays(2)}T07:10:00`));
+  await wake();
+  await N.waitForSelector(`.day-strip a[aria-current][href$="/${inDays(2)}"]`, { timeout: 5000 });
+  await N.click('.day-strip a:last-child');
+  await N.waitForFunction(d => location.hash.endsWith(`/${d}`), inDays(4));
+  await N.clock.setFixedTime(new Date(`${inDays(3)}T07:10:00`));
+  await wake();
+  await N.waitForSelector(`.day-strip a.is-today[href$="/${inDays(3)}"]`, { timeout: 5000 });
+  assert.match(await N.getAttribute('.day-strip a[aria-current]', 'href'), new RegExp(`/${inDays(4)}$`), 'a day tapped ahead moved');
   // A note being written is left alone.
   await N.click('.next-bar a');
   await N.fill('#slipMsg', 'Half a thought');
-  await N.clock.setFixedTime(new Date(`${iso(new Date(today.getFullYear(), today.getMonth(), today.getDate() + 2))}T07:10:00`));
+  await N.clock.setFixedTime(new Date(`${inDays(4)}T07:10:00`));
   await wake();
   assert.equal(await N.inputValue('#slipMsg'), 'Half a thought');
   await night.ctx.close();
