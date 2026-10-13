@@ -9,10 +9,11 @@ import { view } from './view.js';
 import { compose, showSlip, miniSlip } from './slip.js';
 import { print } from './print.js';
 
-let lastPath = null;
+let lastPath = null, drawnOn = '';
 
 async function route() {
   flush();
+  drawnOn = M.todayISO();
   const path = location.hash.replace(/^#\/?/, '');
   const [head, a, b, c] = path.split('/');
   document.body.dataset.screen = head || 'home';
@@ -183,7 +184,17 @@ window.addEventListener('storage', e => {
   if (!location.hash.startsWith('#/e/')) route();
 });
 window.addEventListener('pagehide', flush);
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flush(); });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flush(); else newDay(); });
+// A phone left on the sheet overnight still shows yesterday, and would file the morning's ticks under it.
+// When it's looked at on a new day, draw home or the sheet again, but not the editor or a note being written.
+function newDay() {
+  if (document.visibilityState !== 'visible' || M.todayISO() === drawnOn) return;
+  const head = location.hash.replace(/^#\/?/, '').split('/')[0];
+  if (!head || head === 'v') route();
+}
+window.addEventListener('pageshow', newDay);
+window.addEventListener('focus', newDay);
+setInterval(newDay, 60000);
 route();
 
 if ('serviceWorker' in navigator && !('single' in document.documentElement.dataset) && location.protocol !== 'file:') {

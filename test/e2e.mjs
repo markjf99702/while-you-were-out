@@ -216,6 +216,34 @@ await J.click('.tabs >> text=Care');
 await J.waitForSelector('.who-card');
 assert.match(await J.textContent('#tab'), /Pizza money/);
 
+// Left open overnight: when the phone is looked at again in the morning, Today is the new day.
+{
+  const night = await phone('Jess overnight');
+  const N = night.page;
+  const tomorrow = iso(new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1));
+  await N.clock.setFixedTime(new Date(`${iso(today)}T21:30:00`));
+  await N.goto(sheetUrl2);
+  await N.waitForSelector('.job');
+  await N.locator('.job:has-text("Breakfast")').click();
+  assert.match(await N.textContent('#progress'), /^1 of/);
+  const wake = () => N.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
+  await N.clock.setFixedTime(new Date(`${tomorrow}T07:10:00`));
+  await wake();
+  await N.waitForSelector(`.day-strip a[aria-current][href$="/${tomorrow}"]`, { timeout: 5000 });
+  assert.match(await N.textContent('.day-head h2'), /^Today/);
+  assert.match(await N.textContent('#progress'), /^0 of/);
+  await N.locator('.job:has-text("Breakfast")').click();
+  assert.equal(await N.evaluate(([id, d]) => Object.keys(wywo.store.ticks(id, d)).length, [sheetId, tomorrow]), 1, 'the morning’s tick goes under the new day');
+  assert.match(await N.getAttribute('.next-bar a', 'href'), new RegExp(`/${tomorrow}$`));
+  // A note being written is left alone.
+  await N.click('.next-bar a');
+  await N.fill('#slipMsg', 'Half a thought');
+  await N.clock.setFixedTime(new Date(`${iso(new Date(today.getFullYear(), today.getMonth(), today.getDate() + 2))}T07:10:00`));
+  await wake();
+  assert.equal(await N.inputValue('#slipMsg'), 'Half a thought');
+  await night.ctx.close();
+}
+
 // Home screens.
 await J.goto(base);
 assert.match(await J.textContent('.slist'), /Biscuit and the house.*From Alex/s);
