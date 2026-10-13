@@ -129,17 +129,12 @@ assert.deepEqual(await A.evaluate(() => {
   });
 }), []);
 
-// Asking for less motion: jumping to a new note doesn't glide there.
+// Asking for less motion: jumping to a new note doesn't glide there. A jump has moved the page by the time the tap
+// is handled; a glide hasn't started yet.
 await A.emulateMedia({ reducedMotion: 'reduce' });
 await A.evaluate(() => scrollTo(0, 0));
-const glide = await A.evaluate(() => new Promise(done => {
-  document.querySelector('[data-act="add-house"][data-v=""]').click();
-  const seen = new Set(), t0 = performance.now();
-  const frame = () => { seen.add(scrollY); if (performance.now() - t0 < 500) requestAnimationFrame(frame); else done([...seen]); };
-  requestAnimationFrame(frame);
-}));
-assert.equal(glide.length, 1, `scrolled through ${glide.length} positions`);
-assert.ok(glide[0] > 0);
+const jumpedTo = await A.evaluate(() => { document.querySelector('[data-act="add-house"][data-v=""]').click(); return scrollY; });
+assert.ok(jumpedTo > 0, 'it glided to the new note with less motion asked for');
 await A.emulateMedia({ reducedMotion: null });
 await A.locator('[data-act="del-house"]').last().click();
 
