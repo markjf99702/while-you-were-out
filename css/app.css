@@ -45,6 +45,7 @@
   --print: #9b1d3a;
   --pen: #1f3c98;
   --pen-ui: #1f3c98;
+  --toast-action: var(--slip); /* Undo on the toast, which is dark in the light scheme and light in the dark */
   --tick: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3.5 13.5c2.2 1.6 3.6 3.4 5 6.2C11.6 12 15.8 6.6 21 3.2' fill='none' stroke='%231f3c98' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   --shadow: 0 1px 0 rgba(70, 30, 40, .05), 0 10px 26px -16px rgba(70, 30, 40, .4);
   --display: 'Barlow Condensed', 'Arial Narrow', 'Roboto Condensed', sans-serif-condensed, sans-serif;
@@ -73,6 +74,7 @@
     --print: #861733;
     --pen: #1c3485;
     --pen-ui: #a9bdff;
+    --toast-action: var(--print);
     --tick: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3.5 13.5c2.2 1.6 3.6 3.4 5 6.2C11.6 12 15.8 6.6 21 3.2' fill='none' stroke='%23a9bdff' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     --shadow: 0 1px 0 rgba(0, 0, 0, .25), 0 12px 28px -16px rgba(0, 0, 0, .8);
   }
@@ -528,7 +530,7 @@ body[data-screen="p"] main { max-width: 9.2in; }
   display: flex; align-items: center; gap: 14px; font-weight: 600; font-size: .95rem;
   box-shadow: 0 10px 30px -10px rgba(0, 0, 0, .5);
 }
-.toast button { border: 0; background: none; color: var(--slip); font-weight: 750; padding: 6px 4px; }
+.toast button { border: 0; background: none; color: var(--toast-action); font-weight: 750; padding: 6px 4px; }
 .sheet {
   border: 0; padding: 0; border-radius: 20px; width: min(94vw, 520px); max-height: 90vh;
   background: var(--card); color: var(--ink); box-shadow: 0 30px 80px -20px rgba(0, 0, 0, .55);
