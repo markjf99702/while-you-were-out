@@ -105,7 +105,7 @@ await A.click('[data-act="add-house"][data-v="Getting in"]');
 await A.locator('textarea[data-b^="house:"]').last().fill('Side door keypad: 1954.');
 await A.click('[data-act="add-contact"][data-v="Vet"]');
 await A.locator('input[data-b$=".name"][data-b^="contacts:"]').last().fill('Lakeshore Animal Clinic');
-await A.locator('input[data-b$=".phone"][data-b^="contacts:"]').last().fill('(555) 010-0120');
+await A.locator('input[data-b$=".phone"][data-b^="contacts:"]').last().fill('(555) 010-0120 ext. 12');
 await fits(A, 'the editor');
 // Every box stops at the length the sheet keeps, so nothing is cut short later without warning.
 assert.deepEqual(await A.evaluate(() => {
@@ -133,7 +133,7 @@ const saved = await A.evaluate(() => wywo.store.mine()[0]);
 assert.equal(saved.title, 'Biscuit and the house');
 assert.equal(saved.charges[0].notes.length, 2);
 assert.equal(saved.house[0].secret, true, 'door codes are hidden until tapped by default');
-assert.equal(saved.contacts[0].phone, '(555) 010-0120');
+assert.equal(saved.contacts[0].phone, '(555) 010-0120 ext. 12');
 const sheetId = saved.id;
 
 await A.click('[data-act="send"]');
@@ -178,6 +178,7 @@ await closeSheet(J);
 await J.click('.tabs >> text=Call');
 assert.match(await J.textContent('.contact.main'), /Alex.*\(555\) 010-0142/s);
 assert.equal(await J.getAttribute('.contact.main a.btn.primary', 'href'), 'tel:5550100142');
+assert.equal(await J.getAttribute('.contact:has-text("Lakeshore") a.btn.primary', 'href'), 'tel:5550100120,12', 'the extension after a pause');
 assert.match(await J.textContent('#tab'), /ASPCA Animal Poison Control/);
 await fits(J, 'call');
 

@@ -1,5 +1,6 @@
 // Small pieces every screen uses: escaping, the toast, the sheet that slides up, copying and sharing,
 // and one set of event handlers for whichever screen is showing.
+import { dialParts } from './model.js';
 
 export const app = document.getElementById('app');
 
@@ -66,8 +67,9 @@ export async function share({ title, text, url }, field) {
   copy(url, field);
 }
 
-export const tel = phone => `tel:${String(phone).replace(/[^\d+]/g, '')}`;
-export const sms = phone => `sms:${String(phone).replace(/[^\d+]/g, '')}`;
+// A call dials an extension after a pause (the comma); a text goes to the number alone.
+export const tel = phone => { const [num, ext] = dialParts(phone); return `tel:${num}${ext ? `,${ext}` : ''}`; };
+export const sms = phone => `sms:${dialParts(phone)[0]}`;
 export const plural = (n, one, many = one + 's') => `${n} ${n === 1 ? one : many}`;
 
 export function download(name, text, type = 'application/json') {

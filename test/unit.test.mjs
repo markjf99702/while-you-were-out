@@ -72,6 +72,16 @@ test('Wi-Fi codes escape the characters that mean something to a camera', () => 
   assert.equal(M.wifiCode({ name: '', pass: 'x' }), '');
 });
 
+test('a number with an extension dials the number, then the extension', () => {
+  assert.deepEqual(M.dialParts('(555) 010-0120 ext. 12'), ['5550100120', '12']);
+  assert.deepEqual(M.dialParts('555-0100 x4'), ['5550100', '4']);
+  assert.deepEqual(M.dialParts('555-0100x4'), ['5550100', '4']);
+  assert.deepEqual(M.dialParts('+1 (555) 010-0142 extension 7'), ['+15550100142', '7']);
+  assert.deepEqual(M.dialParts('(555) 010-0142'), ['5550100142', '']);
+  assert.deepEqual(M.dialParts('555-0100 (text only)'), ['5550100', ''], 'an x in a word isn’t an extension');
+  assert.deepEqual(M.dialParts('Fax 5550100'), ['5550100', ''], 'nor is one with no number before it');
+});
+
 test('a Wi-Fi name with quotes and brackets stays inside the code’s label', () => {
   const svg = qrSVG('WIFI:T:nopass;S:x;;', { label: 'Wi-Fi code for "><img src=x onerror=alert(1)> & co' });
   assert.ok(svg.includes('aria-label="Wi-Fi code for &quot;&gt;&lt;img src=x onerror=alert(1)&gt; &amp; co"'), svg.slice(0, 160));

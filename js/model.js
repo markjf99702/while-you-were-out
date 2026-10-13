@@ -169,6 +169,15 @@ export function poisonLines(sheet) {
 // Labels that deserve a second look get flagged in the sitter's view.
 export const isWarning = label => /^(meds?|medicine|medication|allerg|don[’']?t|health)/i.test(label.trim());
 
+// The digits to dial, and an extension if the number ends with one: "(555) 010-0120 ext. 12" → ['5550100120', '12'].
+// Only ext, extension or x and digits at the very end, after a number, count, so "555-0100 (text only)" has none.
+export function dialParts(phone) {
+  const s = String(phone ?? '');
+  const m = s.match(/^(.*?)\s*(?:ext\.?|extension|x)\s*(\d+)\s*$/i);
+  const [num, ext] = m && /\d/.test(m[1]) ? [m[1], m[2]] : [s, ''];
+  return [num.replace(/[^\d+]/g, ''), ext];
+}
+
 // ---------- Wi-Fi ----------
 // The text a phone camera reads from a Wi-Fi code: WIFI:T:WPA;S:name;P:password;;
 export function wifiCode(wifi) {
