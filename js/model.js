@@ -205,6 +205,7 @@ export function cleanSheet(raw = {}) {
   s.created = Number(raw.created) || Date.now();
   s.updated = Number(raw.updated) || s.created;
   if (!raw.mine) delete s.mine;
+  if (raw.mine && raw.example) s.example = true; // only ever your own copy of the example
   if (raw.got) s.got = { at: Number(raw.got.at) || Date.now() };
   s.title = str(raw.title, 120);
   s.from = isISO(raw.from) ? raw.from : '';
@@ -256,7 +257,7 @@ export function cleanSlip(raw = {}) {
 
 // What goes in a link: no empty fields, and nothing that only matters on this device.
 export function forLink(sheet) {
-  const { mine, got, ...rest } = sheet;
+  const { mine, got, example, ...rest } = sheet;
   return prune(rest);
 }
 function prune(x) {

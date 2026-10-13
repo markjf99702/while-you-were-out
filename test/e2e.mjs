@@ -293,6 +293,13 @@ await A.goto(`${base}#/example`);
 await A.waitForSelector('.job');
 assert.match(await A.textContent('.tabs'), /Notes\s*1/);
 await fits(A, 'the example');
+await A.reload();
+await A.waitForSelector('.job');
+assert.match(await A.textContent('.owner-bar p'), /^An example\./, 'still the example after a reload');
+await A.goto(base);
+await A.click('text=See an example');
+await A.waitForSelector('.job');
+assert.equal(await A.evaluate(() => wywo.store.mine().filter(s => s.title === 'Biscuit, Olive and the house').length), 1, 'See an example again opens the same one');
 
 // Works offline once it has been opened.
 await J.waitForFunction(() => navigator.serviceWorker?.controller, null, { timeout: 15000 });

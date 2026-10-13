@@ -60,6 +60,7 @@ export async function readSheet(data) {
   if (!raw || typeof raw !== 'object' || !raw.id) throw new Error('not a sheet');
   const s = cleanSheet(raw);
   delete s.mine;
+  delete s.example;
   return s;
 }
 

@@ -191,6 +191,16 @@ test('dogs come in from Trick Deck with the words they know', () => {
   assert.equal(s.charges[0].cues.length, 3);
 });
 
+test('the example stays the example after a reload, and a link never makes a sitter’s copy one', async () => {
+  const s = makeExample(noon('2026-10-05'));
+  assert.equal(M.cleanSheet(s).example, true);
+  assert.equal(M.forLink(s).example, undefined);
+  assert.equal((await readSheet((await sheetLink(s)).split('#/s/')[1])).example, undefined);
+  // Links sent from the example before carried the flag.
+  assert.equal((await readSheet(await pack({ ...M.forLink(s), example: true }))).example, undefined);
+  assert.equal(M.cleanSheet({ example: true }).example, undefined);
+});
+
 test('what goes in a link leaves out empty fields', () => {
   const s = M.blankSheet();
   s.title = 'Hi';
