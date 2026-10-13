@@ -58,6 +58,7 @@ await A.evaluate(() => document.fonts.ready);
 await fits(A, 'home');
 await A.click('text=Make a care sheet');
 await A.waitForSelector('#basics');
+assert.deepEqual(await A.locator('[data-act="add-charge"]').allTextContents(), ['🐶 Add a dog', '🐱 Add a cat', '🐰 Add another pet', '🧒 Add a child']);
 await A.fill('[data-b="title"]', 'Biscuit and the house');
 await A.fill('[data-b="from"]', iso(today));
 await A.fill('[data-b="to"]', iso(later));

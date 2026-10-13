@@ -119,7 +119,7 @@ function who(s) {
       <h2 class="form-h">Who you’re looking after</h2>
       ${s.charges.map(c => chargeCard(s, c)).join('')}
       <div class="add-row">
-        ${Object.entries(M.KINDS).map(([k, v]) => `<button type="button" class="btn small" data-act="add-charge" data-v="${k}">${v.emoji[0]} Add a ${v.name.toLowerCase()}</button>`).join('')}
+        ${Object.entries(M.KINDS).map(([k, v]) => `<button type="button" class="btn small" data-act="add-charge" data-v="${k}">${v.emoji[0]} ${k === 'pet' ? 'Add another pet' : `Add a ${v.name.toLowerCase()}`}</button>`).join('')}
       </div>
       ${fromTD.length ? `<div class="chips td-row"><span>From Trick Deck:</span>${fromTD.map(d => `<button type="button" class="chip td" data-act="td-dog" data-id="${d.id}">${esc(d.emoji)} ${esc(d.name)}</button>`).join('')}</div>` : ''}
     </section>`;
