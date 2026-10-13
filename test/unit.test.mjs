@@ -7,6 +7,7 @@ import { pack, unpack, sheetLink, slipLink, readSheet, readSlip, base, SITE } fr
 import { makeExample, exampleSlip } from '../js/example.js';
 import { trickDeckDogs, bringIn } from '../js/trickdeck.js';
 import { CUES } from '../js/cues.js';
+import { qrSVG } from '../js/qr.js';
 
 const noon = (s) => new Date(`${s}T12:00:00`).getTime();
 
@@ -69,6 +70,12 @@ test('Wi-Fi codes escape the characters that mean something to a camera', () => 
   assert.equal(M.wifiCode({ name: 'a;b', pass: 'c:d,e"f\\g' }), 'WIFI:T:WPA;S:a\\;b;P:c\\:d\\,e\\"f\\\\g;;');
   assert.equal(M.wifiCode({ name: 'Cafe', pass: '' }), 'WIFI:T:nopass;S:Cafe;;');
   assert.equal(M.wifiCode({ name: '', pass: 'x' }), '');
+});
+
+test('a Wi-Fi name with quotes and brackets stays inside the code’s label', () => {
+  const svg = qrSVG('WIFI:T:nopass;S:x;;', { label: 'Wi-Fi code for "><img src=x onerror=alert(1)> & co' });
+  assert.ok(svg.includes('aria-label="Wi-Fi code for &quot;&gt;&lt;img src=x onerror=alert(1)&gt; &amp; co"'), svg.slice(0, 160));
+  assert.equal(svg.match(/</g).length, 4, 'nothing but the svg, its square, its path and the closing tag');
 });
 
 test('what arrives is trimmed to the shapes the page expects', () => {

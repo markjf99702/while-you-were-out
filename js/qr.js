@@ -4,6 +4,9 @@ import qrcode from './vendor/qrcode.js';
 // Network names and passwords can have any character in them, so send them as UTF-8.
 qrcode.stringToBytes = s => Array.from(new TextEncoder().encode(s));
 
+// The label can carry the network's name, so it's escaped like any other text going into the page.
+const attr = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+
 export function qrSVG(text, { label = 'QR code' } = {}) {
   const qr = qrcode(0, 'M');
   qr.addData(text, 'Byte');
@@ -13,5 +16,5 @@ export function qrSVG(text, { label = 'QR code' } = {}) {
   for (let r = 0; r < n; r++) {
     for (let c = 0; c < n; c++) if (qr.isDark(r, c)) d += `M${c + q} ${r + q}h1v1h-1z`;
   }
-  return `<svg class="qr" viewBox="0 0 ${n + q * 2} ${n + q * 2}" role="img" aria-label="${label}" shape-rendering="crispEdges"><rect width="100%" height="100%" fill="#fff"/><path d="${d}" fill="#111"/></svg>`;
+  return `<svg class="qr" viewBox="0 0 ${n + q * 2} ${n + q * 2}" role="img" aria-label="${attr(label)}" shape-rendering="crispEdges"><rect width="100%" height="100%" fill="#fff"/><path d="${d}" fill="#111"/></svg>`;
 }
