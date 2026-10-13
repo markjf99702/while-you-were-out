@@ -343,13 +343,15 @@ await J.waitForFunction(() => navigator.serviceWorker?.controller, null, { timeo
 const cacheNames = await J.evaluate(() => caches.keys());
 assert.ok(cacheNames.includes('on-balance-v1'), `another project's offline copy survives: ${cacheNames}`);
 assert.ok(!cacheNames.includes('while-you-were-out-v0') && cacheNames.some(k => k.startsWith('while-you-were-out-')), `only this one's old copy is cleared: ${cacheNames}`);
-await jess.ctx.setOffline(true);
+// No signal at all: the server goes away and the page loads again from scratch, from the service worker's copy.
 await J.goto(`${base}#/v/${sheetId}/today`);
 await J.waitForSelector('.job');
+server.closeAllConnections();
+await new Promise(done => server.close(done));
+await J.reload();
+await J.waitForSelector('.job');
 assert.match(await J.textContent('.sheet-head'), /Biscuit and the house/);
-await jess.ctx.setOffline(false);
 
 assert.deepEqual(problems.filter(p => !/ failed: /.test(p)), [], 'problems while using it');
 await browser.close();
-server.close();
 console.log('all good');
