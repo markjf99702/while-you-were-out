@@ -348,6 +348,10 @@ assert.equal(await A.locator('.p-wifi svg.qr').count(), 1);
 await A.check('#hideCodes');
 assert.equal(await A.locator('.paper:has-text("1954")').count(), 0, 'codes left off when asked');
 assert.equal(await A.locator('.paper:has-text("biscuit;2019")').count(), 0);
+// Printed from a phone in dark mode, with backgrounds on, the margin around the paper stays white.
+await A.emulateMedia({ media: 'print', colorScheme: 'dark' });
+assert.equal(await A.evaluate(() => getComputedStyle(document.documentElement).colorScheme), 'light', 'the page prints in the dark scheme');
+await A.emulateMedia({ media: null, colorScheme: null });
 
 // On a long stay the day strip is wider than the phone, and it opens on the day showing.
 const longId = await A.evaluate(() => {

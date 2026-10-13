@@ -569,6 +569,7 @@ body[data-screen="p"] main { max-width: 9.2in; }
 
 @page { size: letter; margin: .4in; }
 @media print {
+  :root { color-scheme: light !important; } /* or the dark scheme's near-black shows in the page margins when backgrounds print */
   body { background: #fff; }
   .bar, .print-tools, .toast, .sheet, .noscript, .jd-foot { display: none !important; }
   main { max-width: none; padding: 0; margin: 0; }
