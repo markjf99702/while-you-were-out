@@ -178,11 +178,11 @@ function home() {
 }
 
 window.addEventListener('hashchange', route);
-// Another tab changed something: catch up, unless you're typing on this one.
+// Another tab changed something: catch up, unless you're typing on this one (the editor, or a note).
 window.addEventListener('storage', e => {
   if (e.key !== store.key) return;
   store.reload();
-  if (!location.hash.startsWith('#/e/')) route();
+  if (!/^#\/[ew]\//.test(location.hash)) route();
 });
 window.addEventListener('pagehide', flush);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flush(); else newDay(); });

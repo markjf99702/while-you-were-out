@@ -192,6 +192,14 @@ assert.deepEqual(await J.locator('.slip-done li span').allTextContents(), ['Brea
 await J.fill('#slipFrom', 'Jess');
 await J.check('[data-mark="well"]', { force: true });
 await J.fill('#slipMsg', 'He did his sit for a treat. All good here.');
+// A save in another tab (a tick on tomorrow's list) leaves the note being written alone.
+await J.evaluate(() => addEventListener('storage', () => { window.heard = true; }));
+const J2 = await jess.ctx.newPage();
+await J2.goto(`${base}#/v/${sheetId}/today/${iso(new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1))}`);
+await J2.locator('.job:has-text("Breakfast")').click();
+await J.waitForFunction(() => window.heard);
+assert.equal(await J.inputValue('#slipMsg'), 'He did his sit for a treat. All good here.', 'the other tab wiped the note');
+await J2.close();
 await fits(J, 'the note');
 await J.click('#sendSlip');
 const slipUrl = await linkFromSheet(J);
