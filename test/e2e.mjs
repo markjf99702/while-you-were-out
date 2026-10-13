@@ -120,6 +120,9 @@ await closeSheet(A);
 // ---------- Jess opens it ----------
 const jess = await phone('Jess');
 const J = jess.page;
+// The other projects on junkdrawer.works keep their offline copies in this origin's caches too.
+await J.goto(`${base}icon.svg`);
+await J.evaluate(() => Promise.all(['on-balance-v1', 'while-you-were-out-v0'].map(name => caches.open(name))));
 await J.goto(sheetUrl);
 await J.waitForSelector('.job');
 await J.evaluate(() => document.fonts.ready);
@@ -222,7 +225,10 @@ assert.match(await A.textContent('.tabs'), /Notes\s*1/);
 await fits(A, 'the example');
 
 // Works offline once it has been opened.
-await J.waitForFunction(() => navigator.serviceWorker?.controller, null, { timeout: 10000 }).catch(() => {});
+await J.waitForFunction(() => navigator.serviceWorker?.controller, null, { timeout: 15000 });
+const cacheNames = await J.evaluate(() => caches.keys());
+assert.ok(cacheNames.includes('on-balance-v1'), `another project's offline copy survives: ${cacheNames}`);
+assert.ok(!cacheNames.includes('while-you-were-out-v0') && cacheNames.some(k => k.startsWith('while-you-were-out-')), `only this one's old copy is cleared: ${cacheNames}`);
 await jess.ctx.setOffline(true);
 await J.goto(`${base}#/v/${sheetId}/today`);
 await J.waitForSelector('.job');
