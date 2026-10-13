@@ -295,6 +295,11 @@ await J.goto(base);
 assert.match(await J.textContent('.slist'), /Biscuit and the house.*From Alex/s);
 await A.goto(base);
 assert.match(await A.textContent('.slist'), /Biscuit and the house/);
+// The keyboard's place shows on Load a backup, whose file box is invisible.
+await A.focus('[data-act="save"]');
+await A.keyboard.press('Tab');
+assert.equal(await A.evaluate(() => document.activeElement.id), 'loadBackup');
+assert.equal(await A.$eval('.keep label', el => getComputedStyle(el).outlineStyle), 'solid', 'no focus ring on Load a backup');
 // The same for deleting on home and moving on before Undo. And the toast's Undo reads in the dark too.
 await A.emulateMedia({ colorScheme: 'dark' });
 await A.click(`[data-del="${sheetId}"]`);

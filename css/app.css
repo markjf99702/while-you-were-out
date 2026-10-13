@@ -212,6 +212,7 @@ body[data-screen="p"] .jd-foot { display: none; }
 .keep p { margin: 0; flex: 1 1 100%; }
 .keep label { cursor: pointer; position: relative; }
 .keep input[type=file] { position: absolute; width: 1px; height: 1px; opacity: 0; left: 0; }
+.keep label:has(input:focus-visible) { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
 
 /* The editor */
 .form-card {
