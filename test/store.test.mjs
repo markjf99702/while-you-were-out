@@ -55,3 +55,13 @@ test('a backup with a damaged entry loads the rest, and a file that isn’t one 
   assert.throws(() => store.restore('not a backup'), /isn’t a While You Were Out backup/);
   assert.deepEqual(titles(store.mine()), ['Already here', 'From backup 1', 'From backup 2']);
 });
+
+test('a sheet that arrives again unchanged isn’t an update', () => {
+  left({ sheets: [] });
+  const { mine, ...theirs } = { ...sheet('From Alex'), updated: 1000 };
+  assert.equal(store.receive(structuredClone(theirs)).status, 'new');
+  assert.equal(store.receive(structuredClone(theirs)).status, 'same');
+  assert.equal(store.receive({ ...structuredClone(theirs), updated: 2000, title: 'Newer' }).status, 'updated');
+  assert.equal(store.receive(structuredClone(theirs)).status, 'older');
+  assert.equal(store.get(theirs.id).title, 'Newer');
+});

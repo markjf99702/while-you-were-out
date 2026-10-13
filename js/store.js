@@ -73,6 +73,7 @@ export const store = {
     const have = store.get(sheet.id);
     if (have?.mine) return { sheet: have, status: 'mine' };
     if (have && (have.updated || 0) > (sheet.updated || 0)) return { sheet: have, status: 'older' };
+    if (have && (have.updated || 0) === (sheet.updated || 0)) return { sheet: have, status: 'same' }; // the same link again
     sheet.got = { at: Date.now() };
     store.put(sheet, { touch: false });
     return { sheet, status: have ? 'updated' : 'new' };

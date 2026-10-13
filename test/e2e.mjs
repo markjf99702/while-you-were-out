@@ -276,6 +276,9 @@ assert.match(await J.textContent('#toast'), /newer copy/, 'an old link doesn’t
 await J.click('.tabs >> text=Care');
 await J.waitForSelector('.who-card');
 assert.match(await J.textContent('#tab'), /Pizza money/);
+await J.goto(sheetUrl2);
+await J.waitForSelector('.job');
+assert.doesNotMatch(await J.textContent('#toast'), /Updated/, 'the same link again isn’t an update');
 
 // Left open overnight: when the phone is looked at again in the morning, Today is the new day.
 {
