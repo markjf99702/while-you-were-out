@@ -24,7 +24,7 @@ export function slipHTML(slip, { editing = false, from = '' } = {}) {
         <span class="lbl">Time</span><span class="hand">${esc(time(slip.at))}</span>
       </div>
       <div class="slip-line"><span class="lbl">From</span>${editing
-        ? `<input class="hand" id="slipFrom" value="${esc(from)}" placeholder="Your name" aria-label="Your name" autocomplete="given-name">`
+        ? `<input class="hand" id="slipFrom" value="${esc(from)}" placeholder="Your name" aria-label="Your name" autocomplete="given-name" maxlength="60">`
         : `<span class="hand">${esc(slip.from || '')}</span>`}</div>
       <div class="marks">${M.MARKS.map(box).join('')}</div>
       <div class="slip-done">
@@ -36,7 +36,7 @@ export function slipHTML(slip, { editing = false, from = '' } = {}) {
       <div class="slip-msg">
         <span class="lbl">Message</span>
         ${editing
-          ? `<textarea class="hand" id="slipMsg" rows="4" placeholder="How it went" aria-label="Message">${esc(slip.msg)}</textarea>`
+          ? `<textarea class="hand" id="slipMsg" rows="4" placeholder="How it went" aria-label="Message" maxlength="1200">${esc(slip.msg)}</textarea>`
           : `<p class="hand">${lines(slip.msg) || '&nbsp;'}</p>`}
       </div>
       <footer class="slip-foot"><span class="lbl">Signed</span><span class="hand sig">${esc(editing ? from : slip.from)}</span></footer>

@@ -84,6 +84,10 @@ await A.locator('textarea[data-b*=".notes:"]').last().fill('Half a pill in chees
 await A.click('[data-act="sug"]:has-text("Biscuit: Breakfast")');
 await A.click('[data-act="sug"]:has-text("Biscuit: Dinner")');
 await A.click('[data-act="task"][data-id=""]');
+assert.deepEqual(await A.evaluate(() => {
+  const kept = wywo.M.cleanSheet({ tasks: [{ what: 'x'.repeat(5000), detail: 'x'.repeat(5000) }] }).tasks[0];
+  return [document.querySelector('#tWhat').maxLength - kept.what.length, document.querySelector('#tDetail').maxLength - kept.detail.length];
+}), [0, 0], 'the job’s boxes stop where the sheet does');
 await A.fill('#tWhat', 'Water the ferns');
 await A.selectOption('#tWho', 'house');
 await A.click('#tDays [data-day="6"]');
@@ -103,6 +107,26 @@ await A.click('[data-act="add-contact"][data-v="Vet"]');
 await A.locator('input[data-b$=".name"][data-b^="contacts:"]').last().fill('Lakeshore Animal Clinic');
 await A.locator('input[data-b$=".phone"][data-b^="contacts:"]').last().fill('(555) 010-0120');
 await fits(A, 'the editor');
+// Every box stops at the length the sheet keeps, so nothing is cut short later without warning.
+assert.deepEqual(await A.evaluate(() => {
+  // "charges:ab12.notes:cd34.text" → the note and "text", the way the editor finds what a box is for.
+  const at = (obj, path) => {
+    const parts = path.split('.');
+    for (const p of parts.slice(0, -1)) {
+      const [k, id] = p.split(':'), [key, i] = k.split('#');
+      obj = id !== undefined ? obj[key].find(x => x.id === id) : i !== undefined ? obj[key][Number(i)] : obj[key];
+    }
+    return [obj, parts[parts.length - 1]];
+  };
+  const s = wywo.store.mine()[0];
+  return [...document.querySelectorAll('#app input[data-b], #app textarea[data-b]')].filter(el => !['checkbox', 'date'].includes(el.type)).flatMap(el => {
+    const copy = structuredClone(s);
+    const [obj, key] = at(copy, el.dataset.b);
+    obj[key] = 'x'.repeat(5000);
+    const [back, k] = at(wywo.M.cleanSheet({ ...copy, mine: true }), el.dataset.b);
+    return el.maxLength === back[k].length ? [] : [`${el.dataset.b}: box ${el.maxLength}, kept ${back[k].length}`];
+  });
+}), []);
 
 // Everything typed was saved.
 const saved = await A.evaluate(() => wywo.store.mine()[0]);
@@ -160,6 +184,10 @@ await fits(J, 'call');
 // A note back.
 await J.click('text=Leave Alex a note');
 await J.waitForSelector('.slip.editing');
+assert.deepEqual(await J.evaluate(() => {
+  const kept = wywo.M.cleanSlip({ sheet: 'x', from: 'x'.repeat(5000), msg: 'x'.repeat(5000) });
+  return [document.querySelector('#slipFrom').maxLength - kept.from.length, document.querySelector('#slipMsg').maxLength - kept.msg.length];
+}), [0, 0], 'the note’s boxes stop where the note does');
 assert.deepEqual(await J.locator('.slip-done li span').allTextContents(), ['Breakfast, Biscuit']);
 await J.fill('#slipFrom', 'Jess');
 await J.check('[data-mark="well"]', { force: true });

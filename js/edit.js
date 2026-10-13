@@ -32,10 +32,11 @@ function target(s, path) {
   return [obj, parts[parts.length - 1]];
 }
 
-const field = (label, path, value, { type = 'text', ph = '', list = '', area = false, cls = '' } = {}) => `
+// max is the length the sheet keeps (cleanSheet in model.js cuts there), so the box stops there instead.
+const field = (label, path, value, { type = 'text', ph = '', list = '', area = false, cls = '', max = 0 } = {}) => `
   <label class="field ${cls}"><span>${label}</span>${area
-    ? `<textarea data-b="${path}" rows="2" placeholder="${esc(ph)}">${esc(value)}</textarea>`
-    : `<input type="${type}" data-b="${path}" value="${esc(value)}" placeholder="${esc(ph)}"${list ? ` list="${list}"` : ''}${type === 'tel' ? ' autocomplete="tel"' : ''}>`}</label>`;
+    ? `<textarea data-b="${path}" rows="2" placeholder="${esc(ph)}"${max ? ` maxlength="${max}"` : ''}>${esc(value)}</textarea>`
+    : `<input type="${type}" data-b="${path}" value="${esc(value)}" placeholder="${esc(ph)}"${max ? ` maxlength="${max}"` : ''}${list ? ` list="${list}"` : ''}${type === 'tel' ? ' autocomplete="tel"' : ''}>`}</label>`;
 
 const x = (act, id, label) => `<button type="button" class="x" data-act="${act}" data-id="${id}" aria-label="${esc(label)}">✕</button>`;
 
@@ -43,17 +44,17 @@ function basics(s) {
   return `
     <section class="form-card" id="basics">
       <h2 class="form-h">The basics</h2>
-      ${field('What’s it for', 'title', s.title, { ph: 'Biscuit and the house' })}
+      ${field('What’s it for', 'title', s.title, { ph: 'Biscuit and the house', max: 120 })}
       <div class="row2">
         ${field('Leaving', 'from', s.from, { type: 'date' })}
         ${field('Back', 'to', s.to, { type: 'date' })}
       </div>
-      ${field('Who’s looking after things', 'sitter', s.sitter, { ph: 'Their first name (optional)' })}
+      ${field('Who’s looking after things', 'sitter', s.sitter, { ph: 'Their first name (optional)', max: 60 })}
       <div class="row2">
-        ${field('Your name', 'owner.name', s.owner.name, { ph: 'Alex' })}
-        ${field('Your phone', 'owner.phone', s.owner.phone, { type: 'tel', ph: '(555) 010-0142' })}
+        ${field('Your name', 'owner.name', s.owner.name, { ph: 'Alex', max: 60 })}
+        ${field('Your phone', 'owner.phone', s.owner.phone, { type: 'tel', ph: '(555) 010-0142', max: 40 })}
       </div>
-      ${field('Where you’ll be', 'away', s.away, { area: true, ph: 'At my sister’s in Tucson, two hours behind. Text first.' })}
+      ${field('Where you’ll be', 'away', s.away, { area: true, ph: 'At my sister’s in Tucson, two hours behind. Text first.', max: 400 })}
     </section>`;
 }
 
@@ -71,13 +72,13 @@ function chargeCard(s, c) {
         </div>
         ${x('del-charge', c.id, `Take ${name} off the sheet`)}
       </div>
-      ${field(`${k.name}’s name`, `charges:${c.id}.name`, c.name, { ph: c.kind === 'kid' ? 'Maya' : c.kind === 'cat' ? 'Olive' : c.kind === 'dog' ? 'Biscuit' : 'Pickles' })}
-      ${field('About', `charges:${c.id}.about`, c.about, { ph: c.kind === 'kid' ? '7, loves dinosaurs, asleep by 8' : 'Age, breed, weight, temperament' })}
+      ${field(`${k.name}’s name`, `charges:${c.id}.name`, c.name, { ph: c.kind === 'kid' ? 'Maya' : c.kind === 'cat' ? 'Olive' : c.kind === 'dog' ? 'Biscuit' : 'Pickles', max: 60 })}
+      ${field('About', `charges:${c.id}.about`, c.about, { ph: c.kind === 'kid' ? '7, loves dinosaurs, asleep by 8' : 'Age, breed, weight, temperament', max: 200 })}
       <div class="notes">
         ${c.notes.map(n => `
           <div class="note-row">
-            <input class="note-label" data-b="charges:${c.id}.notes:${n.id}.label" value="${esc(n.label)}" placeholder="Label" list="labels-${c.kind}" aria-label="Label">
-            <textarea data-b="charges:${c.id}.notes:${n.id}.text" rows="2" placeholder="${esc(hint(n.label, c))}" aria-label="${esc(n.label || 'Note')}">${esc(n.text)}</textarea>
+            <input class="note-label" data-b="charges:${c.id}.notes:${n.id}.label" value="${esc(n.label)}" placeholder="Label" list="labels-${c.kind}" aria-label="Label" maxlength="40">
+            <textarea data-b="charges:${c.id}.notes:${n.id}.text" rows="2" placeholder="${esc(hint(n.label, c))}" aria-label="${esc(n.label || 'Note')}" maxlength="1000">${esc(n.text)}</textarea>
             ${x('del-note', `${c.id}.${n.id}`, `Remove ${n.label || 'this note'}`)}
           </div>`).join('')}
       </div>
@@ -90,8 +91,8 @@ function chargeCard(s, c) {
           <h3 class="mini-h">Words ${esc(c.name.trim() || 'they')} know${c.name.trim() ? 's' : ''}</h3>
           ${c.cues.map((q, i) => `
             <div class="cue-row">
-              <input data-b="charges:${c.id}.cues#${i}.word" value="${esc(q.word)}" placeholder="Sit" aria-label="Word">
-              <input data-b="charges:${c.id}.cues#${i}.signal" value="${esc(q.signal)}" placeholder="Hand signal or what it means" aria-label="Hand signal">
+              <input data-b="charges:${c.id}.cues#${i}.word" value="${esc(q.word)}" placeholder="Sit" aria-label="Word" maxlength="40">
+              <input data-b="charges:${c.id}.cues#${i}.signal" value="${esc(q.signal)}" placeholder="Hand signal or what it means" aria-label="Hand signal" maxlength="120">
               ${x('del-cue', `${c.id}.${i}`, `Remove ${q.word || 'this word'}`)}
             </div>`).join('')}
           <div class="chips">
@@ -173,14 +174,14 @@ function house(s) {
     <section class="form-card" id="house">
       <h2 class="form-h">The house</h2>
       <div class="row2">
-        ${field('Wi-Fi network', 'wifi.name', s.wifi.name, { ph: 'Maple House' })}
-        ${field('Wi-Fi password', 'wifi.pass', s.wifi.pass, { ph: 'Leave blank if there isn’t one' })}
+        ${field('Wi-Fi network', 'wifi.name', s.wifi.name, { ph: 'Maple House', max: 64 })}
+        ${field('Wi-Fi password', 'wifi.pass', s.wifi.pass, { ph: 'Leave blank if there isn’t one', max: 64 })}
       </div>
       <div class="notes">
         ${s.house.map(h => `
           <div class="note-row">
-            <input class="note-label" data-b="house:${h.id}.label" value="${esc(h.label)}" placeholder="Label" list="labels-house" aria-label="Label">
-            <textarea data-b="house:${h.id}.text" rows="2" placeholder="What to know" aria-label="${esc(h.label || 'Note')}">${esc(h.text)}</textarea>
+            <input class="note-label" data-b="house:${h.id}.label" value="${esc(h.label)}" placeholder="Label" list="labels-house" aria-label="Label" maxlength="40">
+            <textarea data-b="house:${h.id}.text" rows="2" placeholder="What to know" aria-label="${esc(h.label || 'Note')}" maxlength="1000">${esc(h.text)}</textarea>
             ${x('del-house', h.id, `Remove ${h.label || 'this note'}`)}
             <label class="check"><input type="checkbox" data-b="house:${h.id}.secret"${h.secret ? ' checked' : ''}> Hide until tapped</label>
           </div>`).join('')}
@@ -201,13 +202,13 @@ function contacts(s) {
       <p class="hint">You’re at the top of the list already. Add whoever else can help.</p>
       ${s.contacts.map(c => `
         <div class="contact-edit">
-          ${field('Name', `contacts:${c.id}.name`, c.name, { ph: 'Dana next door', cls: 'first' })}
+          ${field('Name', `contacts:${c.id}.name`, c.name, { ph: 'Dana next door', cls: 'first', max: 80 })}
           <div class="row2">
-            ${field('Who', `contacts:${c.id}.role`, c.role, { list: 'roles', ph: 'Neighbor' })}
-            ${field('Phone', `contacts:${c.id}.phone`, c.phone, { type: 'tel', ph: '(555) 010-0163' })}
+            ${field('Who', `contacts:${c.id}.role`, c.role, { list: 'roles', ph: 'Neighbor', max: 40 })}
+            ${field('Phone', `contacts:${c.id}.phone`, c.phone, { type: 'tel', ph: '(555) 010-0163', max: 40 })}
           </div>
-          ${field('Address', `contacts:${c.id}.address`, c.address, { ph: 'For directions (optional)' })}
-          ${field('Note', `contacts:${c.id}.note`, c.note, { ph: 'Has a spare key' })}
+          ${field('Address', `contacts:${c.id}.address`, c.address, { ph: 'For directions (optional)', max: 200 })}
+          ${field('Note', `contacts:${c.id}.note`, c.note, { ph: 'Has a spare key', max: 300 })}
           ${x('del-contact', c.id, `Remove ${c.name || c.role || 'this contact'}`)}
         </div>`).join('')}
       <div class="chips">
@@ -235,7 +236,7 @@ function draw(s) {
     ${contacts(s)}
     <section class="form-card" id="else">
       <h2 class="form-h">Anything else</h2>
-      ${field('Anything else they should know', 'notes', s.notes, { area: true, ph: 'Help yourself to anything in the fridge.' })}
+      ${field('Anything else they should know', 'notes', s.notes, { area: true, ph: 'Help yourself to anything in the fridge.', max: 2000 })}
     </section>
     <p class="danger-line"><button type="button" class="link-btn danger" data-act="delete">Delete this sheet</button></p>
     <div class="next-bar">
@@ -398,7 +399,7 @@ function editTask(s, id) {
          ${t.days.filter(d => typeof d === 'string').map(d => `<button type="button" class="day-chip date" data-day="${d}" aria-pressed="true">${esc(M.dayName(d))} ✕</button>`).join('')}`}`;
   openSheet(`
     <h2>${orig ? 'Edit the job' : 'Add a job'}</h2>
-    <label class="field"><span>What</span><input id="tWhat" value="${esc(t.what)}" placeholder="Breakfast"></label>
+    <label class="field"><span>What</span><input id="tWhat" value="${esc(t.what)}" placeholder="Breakfast" maxlength="80"></label>
     <div class="row2">
       <label class="field"><span>For</span><select id="tWho">
         <option value="">Everyone</option>
@@ -409,7 +410,7 @@ function editTask(s, id) {
     </div>
     <div class="field"><span>When in the day</span><div class="seg" id="tSlot">${M.SLOTS.map(([k, n]) => `<button type="button" data-slot="${k}" aria-pressed="${t.slot === k}">${n}</button>`).join('')}</div></div>
     <div class="field"><span>Which days</span><div class="days" id="tDays">${drawDays()}</div></div>
-    <label class="field"><span>Details (optional)</span><textarea id="tDetail" rows="2" placeholder="1 cup kibble and warm water">${esc(t.detail)}</textarea></label>
+    <label class="field"><span>Details (optional)</span><textarea id="tDetail" rows="2" placeholder="1 cup kibble and warm water" maxlength="400">${esc(t.detail)}</textarea></label>
     <div class="sheet-actions">
       <button type="button" class="btn primary" id="tSave">${orig ? 'Done' : 'Add it'}</button>
       ${orig ? '<button type="button" class="btn danger-btn" id="tDel">Remove</button>' : '<button type="button" class="btn" data-close>Cancel</button>'}
