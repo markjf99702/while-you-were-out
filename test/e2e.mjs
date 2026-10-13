@@ -381,6 +381,16 @@ await A.click('text=See an example');
 await A.waitForSelector('.job');
 assert.equal(await A.evaluate(() => wywo.store.mine().filter(s => s.title === 'Biscuit, Olive and the house').length), 1, 'See an example again opens the same one');
 
+// Without JavaScript the page says what it needs, where the sheet would be, not under the footer.
+{
+  const ctx = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
+  const page = await ctx.newPage();
+  await page.goto(base);
+  const [said, foot] = await Promise.all([page.locator('.noscript').boundingBox(), page.locator('.jd-foot').boundingBox()]);
+  assert.ok(said && foot && said.y < foot.y, `the no-JavaScript line is at ${said?.y}, the footer at ${foot?.y}`);
+  await ctx.close();
+}
+
 // Works offline once it has been opened.
 await J.waitForFunction(() => navigator.serviceWorker?.controller, null, { timeout: 15000 });
 const cacheNames = await J.evaluate(() => caches.keys());
