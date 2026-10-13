@@ -158,7 +158,8 @@ function home() {
         const s = store.get(t.dataset.del);
         const undo = s && store.remove(s.id);
         home();
-        if (undo) toast(`Deleted “${s.title || 'New care sheet'}”`, { label: 'Undo', run: () => { undo(); home(); } });
+        // If you've moved on before tapping Undo, the sheet comes back without home being drawn over that page.
+        if (undo) toast(`Deleted “${s.title || 'New care sheet'}”`, { label: 'Undo', run: () => { undo(); if (document.body.dataset.screen === 'home') home(); } });
       } else if (t.dataset.act === 'save') {
         download(`while-you-were-out-${M.todayISO()}.json`, store.backup());
       }

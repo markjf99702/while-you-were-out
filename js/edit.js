@@ -256,6 +256,13 @@ function draw(s) {
 
 function redraw() { saveNow(); draw(current); }
 
+// An Undo can come after you've left the editor (the toast stays up for a few seconds).
+// Save what it put back, and draw the editor again only if it's still the one showing.
+function undone(s) {
+  if (current === s && location.hash === `#/e/${s.id}`) redraw();
+  else store.put(s);
+}
+
 // Text boxes grow to fit what's in them. Newer browsers do this from the CSS alone.
 const grows = typeof CSS !== 'undefined' && CSS.supports?.('field-sizing', 'content');
 function fit(el) {
@@ -316,7 +323,7 @@ export function edit(s) {
         s.charges.splice(i, 1);
         s.tasks = s.tasks.filter(t => t.who !== id);
         redraw();
-        toast(`Took ${c.name || 'them'} off the sheet`, { label: 'Undo', run: () => { s.charges.splice(i, 0, c); s.tasks.push(...tasks); redraw(); } });
+        toast(`Took ${c.name || 'them'} off the sheet`, { label: 'Undo', run: () => { s.charges.splice(i, 0, c); s.tasks.push(...tasks); undone(s); } });
       } else if (act === 'emoji') {
         s.charges.find(c => c.id === id).emoji = v;
         redraw();
@@ -461,7 +468,7 @@ function editTask(s, id) {
       s.tasks.splice(i, 1);
       close();
       redraw();
-      toast(`Removed ${orig.what}`, { label: 'Undo', run: () => { s.tasks.splice(i, 0, orig); redraw(); } });
+      toast(`Removed ${orig.what}`, { label: 'Undo', run: () => { s.tasks.splice(i, 0, orig); undone(s); } });
     };
     if (!orig) setTimeout(() => $('#tWhat').focus(), 50);
   });

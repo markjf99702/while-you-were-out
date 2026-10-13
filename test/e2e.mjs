@@ -233,6 +233,14 @@ await A.click('[data-act="send"]');
 const sheetUrl2 = await linkFromSheet(A);
 assert.notEqual(sheetUrl2, sheetUrl);
 await closeSheet(A);
+// An Undo that comes after leaving the editor puts things back without drawing the editor over the next page.
+await A.click('[data-act="del-charge"]');
+await A.click('.bar-link');
+await A.waitForSelector('.hero');
+await A.click('#toast button');
+assert.equal(await A.locator('#basics').count(), 0, 'the editor came back over home');
+assert.equal(await A.getAttribute('body', 'data-screen'), 'home');
+assert.deepEqual(await A.evaluate(id => wywo.store.get(id).charges.map(c => c.name), sheetId), ['Biscuit']);
 await J.goto(sheetUrl2);
 await J.waitForSelector('.job');
 assert.match(await J.textContent('#toast'), /Updated to Alex’s latest/);
@@ -277,6 +285,15 @@ await J.goto(base);
 assert.match(await J.textContent('.slist'), /Biscuit and the house.*From Alex/s);
 await A.goto(base);
 assert.match(await A.textContent('.slist'), /Biscuit and the house/);
+// The same for deleting on home and moving on before Undo.
+await A.click(`[data-del="${sheetId}"]`);
+await A.click('text=Make a care sheet');
+await A.waitForSelector('#basics');
+await A.click('#toast button');
+assert.equal(await A.locator('.hero').count(), 0, 'home came back over the editor');
+assert.equal(await A.locator('#basics').count(), 1);
+await A.goto(base);
+assert.match(await A.textContent('.slist'), /Biscuit and the house/, 'and the sheet is back');
 
 // The printed sheet: a box for every job on every day, and the Wi-Fi code.
 await A.goto(`${base}#/p/${sheetId}`);
