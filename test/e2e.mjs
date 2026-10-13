@@ -129,6 +129,20 @@ assert.deepEqual(await A.evaluate(() => {
   });
 }), []);
 
+// Asking for less motion: jumping to a new note doesn't glide there.
+await A.emulateMedia({ reducedMotion: 'reduce' });
+await A.evaluate(() => scrollTo(0, 0));
+const glide = await A.evaluate(() => new Promise(done => {
+  document.querySelector('[data-act="add-house"][data-v=""]').click();
+  const seen = new Set(), t0 = performance.now();
+  const frame = () => { seen.add(scrollY); if (performance.now() - t0 < 500) requestAnimationFrame(frame); else done([...seen]); };
+  requestAnimationFrame(frame);
+}));
+assert.equal(glide.length, 1, `scrolled through ${glide.length} positions`);
+assert.ok(glide[0] > 0);
+await A.emulateMedia({ reducedMotion: null });
+await A.locator('[data-act="del-house"]').last().click();
+
 // Everything typed was saved.
 const saved = await A.evaluate(() => wywo.store.mine()[0]);
 assert.equal(saved.title, 'Biscuit and the house');

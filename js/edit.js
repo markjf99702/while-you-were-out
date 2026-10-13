@@ -250,7 +250,8 @@ function draw(s) {
   if (focusNext) {
     const el = app.querySelector(focusNext);
     focusNext = '';
-    if (el) { el.focus({ preventScroll: true }); el.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+    const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (el) { el.focus({ preventScroll: true }); el.scrollIntoView({ block: 'center', behavior: still ? 'auto' : 'smooth' }); }
   }
 }
 
