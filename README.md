@@ -35,7 +35,7 @@ It's a static site: plain HTML, CSS and JavaScript modules, with no build step.
 ```sh
 npx serve .                   # or any static file server, then open the printed address
 npm install                   # only for the tools below: esbuild and upng-js
-npm test                      # dates, links and Trick Deck (Node 20+), then two phones in Chromium (needs Playwright)
+npm test                      # dates, links, Trick Deck and saving (Node 20+), then two phones in Chromium (needs Playwright)
 node tools/screenshots.mjs    # redraws docs/*.png and og.png
 node tools/make-icons.mjs     # redraws the PNG icons from icon.svg
 node tools/trick-cues.mjs ../trick-deck   # refreshes js/cues.js from a Trick Deck checkout
@@ -56,4 +56,4 @@ To put it online with GitHub Pages: **Settings → Pages → Build and deploymen
 - `js/qr.js` draws QR codes with `js/vendor/qrcode.js`, Kazuhiko Arase's QR Code Generator (MIT).
 - `fonts/`: Barlow Condensed, Public Sans and Caveat, all under the SIL Open Font License, served from here so nothing loads from elsewhere.
 - `sw.js`: keeps a copy for using offline.
-- `test/unit.test.mjs` checks dates, which jobs fall on which day, links both ways, cleaning up what arrives, and the Trick Deck import. `test/e2e.mjs` makes a sheet on one phone (bringing a dog in from Trick Deck), opens it on a second, ticks jobs off, sends a note back, updates the sheet, prints it, and checks it works offline.
+- `test/unit.test.mjs` checks dates, which jobs fall on which day, links both ways, cleaning up what arrives, and the Trick Deck import. `test/store.test.mjs` checks saving in the browser: a damaged save, deleting, and backups. `test/e2e.mjs` makes a sheet on one phone (bringing a dog in from Trick Deck), opens it on a second, ticks jobs off, sends a note back, updates the sheet, prints it, and checks it works offline.

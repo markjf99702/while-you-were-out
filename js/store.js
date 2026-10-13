@@ -5,14 +5,19 @@ const KEY = 'while-you-were-out';
 
 function blank() { return { sheets: [], ticks: {}, slips: [], name: '' }; }
 
+// One damaged entry is left out rather than losing everything else with it (the next save would write the loss).
+const isObj = x => !!x && typeof x === 'object' && !Array.isArray(x);
+const sheetsIn = list => (Array.isArray(list) ? list.filter(isObj).map(s => cleanSheet(s)) : []);
+const slipsIn = list => (Array.isArray(list) ? list.filter(isObj).map(s => ({ ...cleanSlip(s), dir: s.dir === 'out' ? 'out' : 'in', read: !!s.read })) : []);
+
 function read() {
   try {
     const data = JSON.parse(localStorage.getItem(KEY));
     if (data && Array.isArray(data.sheets)) {
       return {
-        sheets: data.sheets.map(s => cleanSheet(s)),
-        ticks: data.ticks && typeof data.ticks === 'object' ? data.ticks : {},
-        slips: Array.isArray(data.slips) ? data.slips.map(s => ({ ...cleanSlip(s), dir: s.dir === 'out' ? 'out' : 'in', read: !!s.read })) : [],
+        sheets: sheetsIn(data.sheets),
+        ticks: isObj(data.ticks) ? data.ticks : {},
+        slips: slipsIn(data.slips),
         name: typeof data.name === 'string' ? data.name.slice(0, 60) : '',
       };
     }
@@ -45,8 +50,10 @@ export const store = {
     if (i >= 0) state.sheets[i] = sheet; else state.sheets.push(sheet);
     write();
   },
+  // Returns an undo, or null if the sheet wasn't here (another tab may have deleted it already).
   remove(id) {
     const sheet = store.get(id);
+    if (!sheet) return null;
     const ticks = state.ticks[id];
     const slips = state.slips.filter(s => s.sheet === id);
     state.sheets = state.sheets.filter(s => s.id !== id);
@@ -105,17 +112,19 @@ export const store = {
     let data;
     try { data = JSON.parse(text); } catch { data = null; }
     if (data?.app !== 'while-you-were-out' || !Array.isArray(data.sheets)) throw new Error('That file isn’t a While You Were Out backup.');
+    // Tidy all of it before adding any, so a damaged entry is skipped instead of stopping halfway.
+    const sheets = sheetsIn(data.sheets), slips = slipsIn(data.slips);
     let added = 0;
-    for (const raw of data.sheets) {
-      const s = cleanSheet(raw);
+    for (const s of sheets) {
       const have = store.get(s.id);
       if (!have) { state.sheets.push(s); added++; } else if (s.updated > have.updated) { Object.assign(have, s); added++; }
     }
-    for (const [id, days] of Object.entries(data.ticks || {})) {
-      for (const [day, t] of Object.entries(days || {})) Object.assign(((state.ticks[id] ||= {})[day] ||= {}), t);
+    for (const [id, days] of Object.entries(isObj(data.ticks) ? data.ticks : {})) {
+      if (!isObj(days)) continue;
+      for (const [day, t] of Object.entries(days)) if (isObj(t)) Object.assign(((state.ticks[id] ||= {})[day] ||= {}), t);
     }
-    for (const raw of data.slips || []) {
-      if (!state.slips.some(s => s.id === raw.id)) state.slips.push({ ...cleanSlip(raw), dir: raw.dir === 'out' ? 'out' : 'in', read: !!raw.read });
+    for (const s of slips) {
+      if (!state.slips.some(x => x.id === s.id)) state.slips.push(s);
     }
     if (!state.name && data.name) state.name = String(data.name).slice(0, 60);
     write();

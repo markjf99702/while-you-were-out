@@ -376,7 +376,8 @@ export function edit(s) {
         const undo = store.remove(s.id);
         current = null;
         go('/');
-        toast(`Deleted “${s.title || 'New care sheet'}”`, { label: 'Undo', run: () => { undo(); go(`/e/${s.id}`); } });
+        // Already deleted in another tab: there's nothing here to undo.
+        toast(`Deleted “${s.title || 'New care sheet'}”`, undo && { label: 'Undo', run: () => { undo(); go(`/e/${s.id}`); } });
       }
     },
   });

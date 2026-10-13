@@ -156,9 +156,9 @@ function home() {
       if (!t) return;
       if (t.dataset.del) {
         const s = store.get(t.dataset.del);
-        const undo = store.remove(s.id);
+        const undo = s && store.remove(s.id);
         home();
-        toast(`Deleted “${s.title || 'New care sheet'}”`, { label: 'Undo', run: () => { undo(); home(); } });
+        if (undo) toast(`Deleted “${s.title || 'New care sheet'}”`, { label: 'Undo', run: () => { undo(); home(); } });
       } else if (t.dataset.act === 'save') {
         download(`while-you-were-out-${M.todayISO()}.json`, store.backup());
       }
