@@ -180,8 +180,22 @@ assert.equal(await A.locator('.mark.on').count(), 1);
 await A.goto(`${base}#/v/${sheetId}/notes`);
 assert.equal(await A.locator('.mini-slip').count(), 1);
 await A.goto(slipUrl);
+await A.waitForSelector('.slip');
 await A.goto(`${base}#/v/${sheetId}/notes`);
 assert.equal(await A.locator('.mini-slip').count(), 1, 'opening the same note twice keeps one copy');
+// A link that takes a moment to open doesn't pull you back once you've moved on.
+await A.evaluate(() => {
+  const unpack = Response.prototype.arrayBuffer;
+  Response.prototype.arrayBuffer = function () {
+    return unpack.call(this).then(b => new Promise(done => setTimeout(() => { done(b); setTimeout(() => { window.opened = true; }, 100); }, 500)));
+  };
+  window.quickAgain = () => { Response.prototype.arrayBuffer = unpack; };
+});
+await A.goto(slipUrl);
+await A.goto(`${base}#/v/${sheetId}/today`);
+await A.waitForFunction(() => window.opened);
+assert.equal(await A.evaluate(() => location.hash), `#/v/${sheetId}/today`, 'a slow link took over the page after Alex moved on');
+await A.evaluate(() => window.quickAgain());
 
 // Alex changes the sheet and sends it again; Jess's tick stays.
 await A.goto(`${base}#/e/${sheetId}`);

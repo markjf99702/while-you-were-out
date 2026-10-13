@@ -63,13 +63,21 @@ function message(title, text) {
   on({});
 }
 
-const broken = () => message('That link didn’t come through whole', 'Ask for it again, or copy all of it into the address bar.');
+const cantOpen = e => (e.message.startsWith('This browser')
+  ? message('This browser can’t open that link', e.message)
+  : message('That link didn’t come through whole', 'Ask for it again, or copy all of it into the address bar.'));
+
+// Opening a link takes a moment. If you've gone somewhere else meanwhile, what it brought is kept,
+// but the page stays where you are.
+const movedOn = at => location.hash !== at;
 
 // Someone sent you their care sheet.
 async function incomingSheet(data) {
+  const at = location.hash;
   let s;
-  try { s = await readSheet(data); } catch (e) { return e.message.startsWith('This browser') ? message('This browser can’t open that link', e.message) : broken(); }
+  try { s = await readSheet(data); } catch (e) { return movedOn(at) || cantOpen(e); }
   const { sheet, status } = store.receive(s);
+  if (movedOn(at)) return;
   go(`/v/${sheet.id}/today`, true);
   if (status === 'mine') toast('That’s your own sheet');
   else if (status === 'older') toast('You already have a newer copy of this sheet');
@@ -78,10 +86,12 @@ async function incomingSheet(data) {
 
 // The sitter sent a note back.
 async function incomingSlip(data) {
+  const at = location.hash;
   let slip;
-  try { slip = await readSlip(data); } catch (e) { return e.message.startsWith('This browser') ? message('This browser can’t open that link', e.message) : broken(); }
+  try { slip = await readSlip(data); } catch (e) { return movedOn(at) || cantOpen(e); }
   const have = store.slip(slip.id);
   const saved = have || store.addSlip(slip, store.get(slip.sheet)?.mine || !store.get(slip.sheet) ? 'in' : 'out');
+  if (movedOn(at)) return;
   go(`/note/${saved.id}`, true);
 }
 
