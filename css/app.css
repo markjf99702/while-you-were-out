@@ -118,12 +118,11 @@ body[data-screen="home"] .bar-link { visibility: hidden; }
 main { max-width: 720px; margin: 0 auto; padding: 18px 16px 120px; outline: none; }
 .noscript { text-align: center; padding: 3rem 16px; }
 
-/* Part of junkdrawer.works, under every screen but the printable one */
+/* Part of junkdrawer.works, under every screen, the paper on screen included; printing leaves it off */
 .jd-foot { max-width: 720px; margin: 0 auto; padding: 4px 16px calc(20px + env(safe-area-inset-bottom)); text-align: center; font-size: .85rem; color: var(--ink-2); }
 .jd-foot a { text-decoration: none; }
 .jd-foot a:hover, .jd-foot a:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
 .jd-foot span { margin: 0 6px; }
-body[data-screen="p"] .jd-foot { display: none; }
 
 /* Buttons */
 .btn {

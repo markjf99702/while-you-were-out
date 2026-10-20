@@ -351,6 +351,7 @@ assert.match(await A.textContent('.slist'), /Biscuit and the house/, 'and the sh
 // The printed sheet: a box for every job on every day, and the Wi-Fi code.
 await A.goto(`${base}#/p/${sheetId}`);
 await A.waitForSelector('.paper');
+assert.ok(await A.locator('.jd-foot').isVisible(), 'no junkdrawer.works line under the paper on screen');
 assert.equal(await A.locator('.p-grid thead th').count(), 1 + 5);
 assert.equal(await A.locator('.p-grid tr:has-text("Breakfast") .p-box').count(), 5);
 assert.equal(await A.locator('.p-wifi svg.qr').count(), 1);
@@ -360,6 +361,7 @@ assert.equal(await A.locator('.paper:has-text("biscuit;2019")').count(), 0);
 // Printed from a phone in dark mode, with backgrounds on, the margin around the paper stays white.
 await A.emulateMedia({ media: 'print', colorScheme: 'dark' });
 assert.equal(await A.evaluate(() => getComputedStyle(document.documentElement).colorScheme), 'light', 'the page prints in the dark scheme');
+assert.equal(await A.locator('.jd-foot').isVisible(), false, 'the junkdrawer.works line is printed');
 await A.emulateMedia({ media: null, colorScheme: null });
 
 // On a long stay the day strip is wider than the phone, and it opens on the day showing.
