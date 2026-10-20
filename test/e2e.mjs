@@ -35,6 +35,20 @@ async function phone(who) {
   return { ctx, page };
 }
 const fits = async (page, where) => assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, `${where} scrolls sideways on a phone`);
+// How well some text reads on a background colour (the WCAG contrast ratio), faded by the text's own opacity.
+const contrastOn = (page, sel, bg) => page.$eval(sel, (el, bg) => {
+  const rgb = css => {
+    const probe = document.body.appendChild(document.createElement('i'));
+    probe.style.color = css;
+    const c = getComputedStyle(probe).color.match(/[\d.]+/g).slice(0, 3).map(Number);
+    probe.remove();
+    return c;
+  };
+  const lum = c => c.map(v => (v / 255 <= 0.03928 ? v / 255 / 12.92 : ((v / 255 + 0.055) / 1.055) ** 2.4)).reduce((sum, v, i) => sum + v * [0.2126, 0.7152, 0.0722][i], 0);
+  const back = rgb(bg), a = Number(getComputedStyle(el).opacity);
+  const [x, y] = [lum(rgb(getComputedStyle(el).color).map((v, i) => v * a + back[i] * (1 - a))), lum(back)];
+  return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+}, bg);
 const linkFromSheet = async page => {
   await page.waitForFunction(() => document.querySelector('#sheet #link')?.value.includes('#/'));
   return page.$eval('#sheet #link', el => el.value);
@@ -228,6 +242,8 @@ assert.match(await A.textContent('.slip'), /He did his sit for a treat/);
 assert.equal(await A.locator('.mark.on').count(), 1);
 await A.goto(`${base}#/v/${sheetId}/notes`);
 assert.equal(await A.locator('.mini-slip').count(), 1);
+const dateOnPink = await contrastOn(A, '.mini-slip .ms-head span', 'var(--slip)');
+assert.ok(dateOnPink >= 4.5, `a note's date reads at ${dateOnPink.toFixed(2)}:1 on the pink`);
 await A.goto(slipUrl);
 await A.waitForSelector('.slip');
 await A.goto(`${base}#/v/${sheetId}/notes`);
@@ -322,6 +338,13 @@ await J.goto(base);
 assert.match(await J.textContent('.slist'), /Biscuit and the house.*From Alex/s);
 await A.goto(base);
 assert.match(await A.textContent('.slist'), /Biscuit and the house/);
+// The grey for hints and empty lines reads on the page, and so does the faded line on a note with nothing ticked yet.
+const muted = await contrastOn(A, '.keep p', 'var(--bg)');
+assert.ok(muted >= 4.5, `the muted grey reads at ${muted.toFixed(2)}:1 on the page`);
+await J.goto(`${base}#/w/${sheetId}/${iso(later)}`);
+await J.waitForSelector('.slip-done .faint');
+const faint = await contrastOn(J, '.slip-done .faint', 'var(--slip)');
+assert.ok(faint >= 4.5, `"Nothing ticked off yet" reads at ${faint.toFixed(2)}:1 on the pink`);
 // The keyboard's place shows on Load a backup, whose file box is invisible.
 await A.focus('[data-act="save"]');
 await A.keyboard.press('Tab');

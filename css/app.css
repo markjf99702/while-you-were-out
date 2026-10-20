@@ -29,7 +29,7 @@
   --card: #fffdf9;
   --ink: #2a2327;
   --ink-2: #544950;
-  --muted: #7a6c72;
+  --muted: #766870;
   --line: #e8ded4;
   --line-2: #d5c7bb;
   --field: #fffdf9;
@@ -450,7 +450,7 @@ label.mark { cursor: pointer; }
 .slip-done li { display: flex; align-items: baseline; gap: 6px; }
 .slip-done li .tick { flex: none; width: 18px; height: 18px; align-self: center; }
 .slip-done li i { margin-left: auto; font-style: normal; font-size: 1.1rem; opacity: .75; white-space: nowrap; }
-.slip-done .faint { margin: 2px 0 0; opacity: .6; font-size: 1.3rem; }
+.slip-done .faint { margin: 2px 0 0; opacity: .85; font-size: 1.3rem; }
 .slip-msg { padding: 10px 0 0; }
 .slip-msg p, .slip-msg textarea {
   margin: 0; width: 100%; border: 0; padding: 0 0 2px; min-height: 5.6em; resize: vertical;
@@ -475,7 +475,7 @@ label.mark { cursor: pointer; }
 .mini-slip:nth-child(odd) { transform: rotate(-.5deg); }
 .mini-slip:nth-child(even) { transform: rotate(.4deg); }
 .ms-head { display: flex; justify-content: space-between; gap: 10px; font: 600 .92rem var(--display); text-transform: uppercase; letter-spacing: .08em; }
-.ms-head span { opacity: .8; white-space: nowrap; }
+.ms-head span { white-space: nowrap; }
 .ms-marks { font: 600 .82rem var(--display); text-transform: uppercase; letter-spacing: .08em; opacity: .9; }
 .ms-msg { font-size: 1.35rem; line-height: 1.15; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .mini-slip.unread::after { content: ''; position: absolute; right: -4px; top: -4px; width: 14px; height: 14px; border-radius: 50%; background: var(--pen); border: 2px solid var(--bg); }
