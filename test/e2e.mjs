@@ -49,6 +49,8 @@ const contrastOn = (page, sel, bg) => page.$eval(sel, (el, bg) => {
   const [x, y] = [lum(rgb(getComputedStyle(el).color).map((v, i) => v * a + back[i] * (1 - a))), lum(back)];
   return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
 }, bg);
+// Two frames on, so whatever reacts to a scroll, a resize or fonts arriving has run.
+const frames = page => page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
 const linkFromSheet = async page => {
   await page.waitForFunction(() => document.querySelector('#sheet #link')?.value.includes('#/'));
   return page.$eval('#sheet #link', el => el.value);
@@ -411,6 +413,50 @@ assert.equal(await A.evaluate(() => getComputedStyle(document.documentElement).c
 assert.equal(await A.locator('.jd-foot').isVisible(), false, 'the junkdrawer.works line is printed');
 await A.emulateMedia({ media: null, colorScheme: null });
 
+// On a phone the paper is the printed page made smaller, not squeezed into a long strip. The number to call and the
+// Wi-Fi password aren't broken at a hyphen, and a password too long for its line wraps rather than running off the paper.
+const paperId = await A.evaluate(() => {
+  const { M, store } = wywo, s = M.blankSheet();
+  Object.assign(s, {
+    title: 'On paper', from: M.todayISO(), to: M.addDays(M.todayISO(), 6),
+    owner: { name: 'Alex', phone: '(555) 010-0142' }, wifi: { name: 'Maple House', pass: 'maple-house-guest-2019' },
+    tasks: ['Breakfast', 'Walk', 'Dinner'].map(what => M.newTask('morning', '', what)),
+  });
+  store.put(s);
+  return s.id;
+});
+const shape = () => A.$eval('.paper', el => { const r = el.getBoundingClientRect(); return r.height / r.width; });
+const linesOf = sel => A.$eval(sel, el => { const r = document.createRange(); r.selectNodeContents(el); return new Set([...r.getClientRects()].map(x => Math.round(x.top))).size; });
+await A.goto(`${base}#/p/${paperId}`);
+await A.waitForSelector('.paper:has-text("On paper")');
+await A.uncheck('#hideCodes'); // still ticked from the sheet before
+await A.waitForSelector('.p-wifi .mono');
+await A.setViewportSize({ width: 1280, height: 800 });
+await frames(A);
+const printed = await shape();
+await A.setViewportSize({ width: 390, height: 844 });
+await frames(A);
+const onPhone = await shape();
+assert.ok(Math.abs(onPhone / printed - 1) < 0.15, `the paper is ${onPhone.toFixed(2)} times as tall as it's wide on a phone, ${printed.toFixed(2)} on a computer`);
+await fits(A, 'the paper');
+assert.equal(await linesOf('.p-call b'), 1, 'the number to call is broken across lines');
+assert.equal(await linesOf('.p-wifi .mono'), 1, 'the Wi-Fi password is broken across lines');
+// Too long for a line, they wrap rather than running off the paper or squeezing the column beside them.
+await A.evaluate(id => {
+  const s = wywo.store.get(id);
+  Object.assign(s, { owner: { name: 'Alex', phone: '(555) 010-0142 or (555) 010-0199 at work' }, wifi: { name: 'Maple House', pass: 'correct-horse-battery-staple-and-then-some' } });
+  wywo.store.put(s);
+}, paperId);
+await A.reload();
+await A.waitForSelector('.paper:has-text("correct-horse")');
+const spill = await A.evaluate(() => {
+  const paper = document.querySelector('.paper').getBoundingClientRect(), past = sel => Math.round(document.querySelector(sel).getBoundingClientRect().right - paper.right);
+  return { call: past('.p-call b'), password: past('.p-wifi .mono'), column: document.querySelector('.p-cols > :last-child').getBoundingClientRect().width / paper.width };
+});
+assert.ok(spill.call <= 0 && spill.password <= 0, `a long number or password runs off the paper (px past its edge): ${JSON.stringify(spill)}`);
+assert.ok(spill.column < 0.45, `a long password widens its column to ${Math.round(spill.column * 100)}% of the paper`);
+await A.evaluate(id => wywo.store.remove(id), paperId);
+
 // On a long stay the day strip is wider than the phone, and it opens on the day showing.
 const longId = await A.evaluate(() => {
   const { M, store } = wywo, s = M.blankSheet();
@@ -466,7 +512,7 @@ assert.equal(await A.evaluate(() => wywo.store.mine().filter(s => s.title === 'B
   await P.waitForSelector('.job');
   await P.evaluate(() => document.fonts.ready);
   await P.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
-  await P.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
+  await frames(P);
   const [barBottom, tabsTop] = await P.evaluate(() => [document.querySelector('.bar').getBoundingClientRect().bottom, document.querySelector('.tabs').getBoundingClientRect().top]);
   assert.ok(barBottom > 70, `the top bar is on one line at 320 wide (it ends at ${barBottom}px), so this checks nothing`);
   assert.ok(Math.abs(tabsTop - barBottom) < 1, `the tabs stick at ${tabsTop}px, and the top bar ends at ${barBottom}px`);

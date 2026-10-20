@@ -497,7 +497,11 @@ body[data-screen="p"] main { max-width: 9.2in; }
 .p-sub { margin: 2px 0 0; color: #444; }
 .p-call { text-align: right; display: grid; max-width: 44%; }
 .p-call span { font: 600 10pt var(--display); text-transform: uppercase; letter-spacing: .1em; color: #9b1d3a; }
-.p-call b { font-size: 16pt; }
+/* The number and the password stay whole rather than breaking at a hyphen ("(555) 010-" / "0142"); print.js marks
+   one too long for a line on the paper, which wraps rather than running off it. */
+.p-call b { font-size: 16pt; white-space: nowrap; }
+.p-wifi .mono { white-space: nowrap; }
+.p-call b.long, .p-wifi .mono.long { white-space: normal; overflow-wrap: anywhere; }
 .p-call small { color: #444; font-size: 9pt; }
 .p-grid { width: 100%; border-collapse: collapse; margin: 0 0 14px; font-size: 9.5pt; }
 .p-grid th, .p-grid td { border-bottom: 1px solid #ddd; padding: 3px 4px; text-align: center; vertical-align: middle; }
@@ -522,6 +526,13 @@ body[data-screen="p"] main { max-width: 9.2in; }
 .p-wifi { display: grid; grid-template-columns: 1in 1fr; gap: 10px; align-items: center; margin-bottom: 6px; }
 .p-wifi p { margin: 0; }
 .p-foot { margin-top: 10px; padding-top: 6px; border-top: 1px solid #ddd; color: #777; font-size: 8pt; text-align: center; }
+/* On a phone the paper is laid out at a Letter page's width and shrunk to fit (print.js sets --fit), so it looks like
+   the printout. A browser without zoom keeps the narrow layout rather than scrolling sideways. */
+@media screen {
+  @supports (zoom: 1) {
+    .paper { min-width: 8.5in; zoom: var(--fit, 1); }
+  }
+}
 
 /* Toast and the sheet that slides up */
 .toast {

@@ -6,6 +6,17 @@ import { qrSVG } from './qr.js';
 
 let hideCodes = false;
 
+// On a screen narrower than a Letter page (8.5 inches, 816 pixels), the paper is laid out at that width and shrunk
+// to fit, so it looks like what comes out of the printer instead of a squeezed column (app.css: .paper's zoom).
+function fit() {
+  const paper = app.querySelector('.paper');
+  if (!paper) return;
+  const css = getComputedStyle(app);
+  const room = app.clientWidth - parseFloat(css.paddingLeft) - parseFloat(css.paddingRight);
+  paper.style.setProperty('--fit', Math.min(1, room / 816));
+}
+addEventListener('resize', fit);
+
 export function print(s) {
   document.title = `${s.title || 'Care sheet'} · While You Were Out`;
   draw(s);
@@ -39,6 +50,9 @@ function draw(s) {
   const pass = hideCodes ? '' : s.wifi.pass;
   const wifi = s.wifi.name ? { name: s.wifi.name, pass } : null;
   const onDates = t => t.days.filter(d => typeof d === 'string').map(M.shortDay).join(', ');
+  // The number to call and the password are kept on one line (app.css), unless they're too long for one on the
+  // paper: over 22 and 24 characters. Those wrap rather than run off the page.
+  const longCall = s.owner.phone.length > 22, longPass = pass.length > 24;
   app.innerHTML = `
     <div class="print-tools">
       <a class="btn small" href="#/v/${s.id}/today">Back</a>
@@ -52,7 +66,7 @@ function draw(s) {
           <h1>${esc(s.title || 'Care sheet')}</h1>
           <p class="p-sub">${[M.stayText(s), s.sitter.trim() && `For ${s.sitter.trim()}`].filter(Boolean).map(esc).join(' · ')}</p>
         </div>
-        ${s.owner.phone ? `<div class="p-call"><span>Call ${esc(s.owner.name || 'me')}</span><b>${esc(s.owner.phone)}</b>${s.away ? `<small>${esc(s.away)}</small>` : ''}</div>` : ''}
+        ${s.owner.phone ? `<div class="p-call"><span>Call ${esc(s.owner.name || 'me')}</span><b${longCall ? ' class="long"' : ''}>${esc(s.owner.phone)}</b>${s.away ? `<small>${esc(s.away)}</small>` : ''}</div>` : ''}
       </header>
 
       ${tasks.length ? `
@@ -96,7 +110,7 @@ function draw(s) {
               ${wifi ? `
                 <div class="p-wifi">
                   ${wifi.pass || !s.wifi.pass ? qrSVG(M.wifiCode(wifi), { label: 'Wi-Fi code' }) : ''}
-                  <p><b>Wi-Fi:</b> ${esc(wifi.name)}${wifi.pass ? `<br><b>Password:</b> <span class="mono">${esc(wifi.pass)}</span>` : s.wifi.pass ? '<br>Ask for the password.' : ''}${wifi.pass || !s.wifi.pass ? '<small>Point a phone camera at the square to join.</small>' : ''}</p>
+                  <p><b>Wi-Fi:</b> ${esc(wifi.name)}${wifi.pass ? `<br><b>Password:</b> <span class="mono${longPass ? ' long' : ''}">${esc(wifi.pass)}</span>` : s.wifi.pass ? '<br>Ask for the password.' : ''}${wifi.pass || !s.wifi.pass ? '<small>Point a phone camera at the square to join.</small>' : ''}</p>
                 </div>` : ''}
               ${notes.map(h => `<p><b>${esc(h.label || 'Note')}.</b> ${lines(h.text)}</p>`).join('')}
             </section>` : ''}
@@ -104,4 +118,5 @@ function draw(s) {
       </div>
       <footer class="p-foot">Made with While You Were Out · junkdrawer.works/while-you-were-out</footer>
     </div>`;
+  fit();
 }
