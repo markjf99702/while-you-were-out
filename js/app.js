@@ -167,9 +167,12 @@ function home() {
     async change(e) {
       if (e.target.id !== 'loadBackup' || !e.target.files[0]) return;
       try {
-        const n = store.restore(await e.target.files[0].text());
+        const loaded = store.restore(await e.target.files[0].text());
         home();
-        toast(n ? `Loaded ${plural(n, 'sheet')}` : 'Nothing new in that backup');
+        // Sheets and notes are counted; ticks come in without a word.
+        const counts = [loaded.sheets && plural(loaded.sheets, 'sheet'), loaded.notes && plural(loaded.notes, 'note')].filter(Boolean).join(' and ');
+        if (counts) toast(`Loaded ${counts}`);
+        else if (!loaded.changed) toast('Nothing new in that backup');
       } catch (err) {
         toast(err.message.startsWith('That file') ? err.message : 'That file isn’t a While You Were Out backup.');
       }

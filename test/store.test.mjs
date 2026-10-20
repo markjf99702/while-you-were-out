@@ -41,13 +41,13 @@ test('deleting a sheet another tab already deleted leaves nothing to undo', () =
 test('a backup with a damaged entry loads the rest, and a file that isn’t one changes nothing', () => {
   left({ sheets: [sheet('Already here')] });
   const b1 = sheet('From backup 1'), b2 = sheet('From backup 2');
-  const added = store.restore(JSON.stringify({
+  const loaded = store.restore(JSON.stringify({
     app: 'while-you-were-out', version: 1,
     sheets: [b1, null, b2],
     ticks: { [b1.id]: { '2026-10-13': { t1: 1 }, '2026-10-14': null }, gone: 'junk' },
     slips: [null, { id: 'n2', sheet: b1.id, from: 'Jess', msg: 'Hi' }],
   }));
-  assert.equal(added, 2);
+  assert.deepEqual(loaded, { sheets: 2, notes: 1, changed: true });
   assert.deepEqual(titles(saved().sheets), ['Already here', 'From backup 1', 'From backup 2']);
   assert.deepEqual(store.ticks(b1.id, '2026-10-13'), { t1: 1 });
   assert.equal(store.slips(b1.id).length, 1);
@@ -64,4 +64,18 @@ test('a sheet that arrives again unchanged isn’t an update', () => {
   assert.equal(store.receive({ ...structuredClone(theirs), updated: 2000, title: 'Newer' }).status, 'updated');
   assert.equal(store.receive(structuredClone(theirs)).status, 'older');
   assert.equal(store.get(theirs.id).title, 'Newer');
+});
+
+test('a backup counts the notes it brings back as well as sheets, and ticks come in without being counted', () => {
+  const a = sheet('Biscuit and the house');
+  left({ sheets: [a], slips: [{ id: 'n1', sheet: a.id, from: 'Jess', msg: 'All good' }] });
+  const backup = JSON.parse(store.backup());
+  backup.slips.push({ id: 'n2', sheet: a.id, from: 'Jess', msg: 'Fed' }, { id: 'n3', sheet: a.id, from: 'Jess', msg: 'Walked' });
+  assert.deepEqual(store.restore(JSON.stringify(backup)), { sheets: 0, notes: 2, changed: true });
+  assert.equal(store.slips(a.id).length, 3);
+  assert.deepEqual(store.restore(JSON.stringify(backup)), { sheets: 0, notes: 0, changed: false }, 'the same backup again brings nothing');
+  backup.ticks = { [a.id]: { '2026-10-13': { t1: 5 } } };
+  assert.deepEqual(store.restore(JSON.stringify(backup)), { sheets: 0, notes: 0, changed: true });
+  assert.deepEqual(store.ticks(a.id, '2026-10-13'), { t1: 5 });
+  assert.equal(store.restore(JSON.stringify(backup)).changed, false, 'ticks already here aren’t new');
 });

@@ -350,6 +350,20 @@ await A.focus('[data-act="save"]');
 await A.keyboard.press('Tab');
 assert.equal(await A.evaluate(() => document.activeElement.id), 'loadBackup');
 assert.equal(await A.$eval('.keep label', el => getComputedStyle(el).outlineStyle), 'solid', 'no focus ring on Load a backup');
+// A backup that brings notes back says how many, and the same one again says there's nothing new.
+const withNotes = await A.evaluate(id => {
+  const b = JSON.parse(wywo.store.backup());
+  b.slips.push(...['Fed them both', 'Biscuit walked'].map((msg, i) => ({ id: `bk${i}`, sheet: id, from: 'Jess', msg })));
+  return JSON.stringify(b);
+}, sheetId);
+const loadBackup = async name => {
+  await A.evaluate(() => { document.getElementById('toast').textContent = ''; });
+  await A.setInputFiles('#loadBackup', { name, mimeType: 'application/json', buffer: Buffer.from(withNotes) });
+  await A.waitForFunction(() => document.getElementById('toast').textContent);
+  return A.textContent('#toast');
+};
+assert.equal(await loadBackup('backup.json'), 'Loaded 2 notes');
+assert.equal(await loadBackup('backup-again.json'), 'Nothing new in that backup');
 // The same for deleting on home and moving on before Undo. And the toast's Undo reads in the dark too.
 await A.emulateMedia({ colorScheme: 'dark' });
 await A.click(`[data-del="${sheetId}"]`);

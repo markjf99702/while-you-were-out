@@ -109,26 +109,32 @@ export const store = {
 
   backup: () => JSON.stringify({ app: 'while-you-were-out', version: 1, saved: new Date().toISOString(), ...state }, null, 1),
   // Adds what's in a backup; a sheet already here is replaced if the backup's copy is newer.
+  // Returns how many sheets and notes it brought, and whether anything at all changed (ticks and your name count there).
   restore(text) {
     let data;
     try { data = JSON.parse(text); } catch { data = null; }
     if (data?.app !== 'while-you-were-out' || !Array.isArray(data.sheets)) throw new Error('That file isn’t a While You Were Out backup.');
     // Tidy all of it before adding any, so a damaged entry is skipped instead of stopping halfway.
     const sheets = sheetsIn(data.sheets), slips = slipsIn(data.slips);
-    let added = 0;
+    const loaded = { sheets: 0, notes: 0, changed: false };
     for (const s of sheets) {
       const have = store.get(s.id);
-      if (!have) { state.sheets.push(s); added++; } else if (s.updated > have.updated) { Object.assign(have, s); added++; }
+      if (!have) { state.sheets.push(s); loaded.sheets++; } else if (s.updated > have.updated) { Object.assign(have, s); loaded.sheets++; }
     }
     for (const [id, days] of Object.entries(isObj(data.ticks) ? data.ticks : {})) {
       if (!isObj(days)) continue;
-      for (const [day, t] of Object.entries(days)) if (isObj(t)) Object.assign(((state.ticks[id] ||= {})[day] ||= {}), t);
+      for (const [day, t] of Object.entries(days)) {
+        if (!isObj(t)) continue;
+        const have = ((state.ticks[id] ||= {})[day] ||= {});
+        for (const [task, at] of Object.entries(t)) if (have[task] !== at) { have[task] = at; loaded.changed = true; }
+      }
     }
     for (const s of slips) {
-      if (!state.slips.some(x => x.id === s.id)) state.slips.push(s);
+      if (!state.slips.some(x => x.id === s.id)) { state.slips.push(s); loaded.notes++; }
     }
-    if (!state.name && data.name) state.name = String(data.name).slice(0, 60);
+    if (!state.name && data.name) { state.name = String(data.name).slice(0, 60); loaded.changed = true; }
+    if (loaded.sheets || loaded.notes) loaded.changed = true;
     write();
-    return added;
+    return loaded;
   },
 };
