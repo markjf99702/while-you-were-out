@@ -75,7 +75,12 @@ await A.waitForSelector('#basics');
 assert.deepEqual(await A.locator('[data-act="add-charge"]').allTextContents(), ['🐶 Add a dog', '🐱 Add a cat', '🐰 Add another pet', '🧒 Add a child']);
 await A.fill('[data-b="title"]', 'Biscuit and the house');
 await A.fill('[data-b="from"]', iso(today));
+// Back can't be picked before Leaving, and typed in before it, it says the stay is one day.
+assert.equal(await A.getAttribute('[data-b="to"]', 'min'), iso(today), 'Back can be picked before Leaving');
+await A.fill('[data-b="to"]', iso(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1)));
+assert.ok(await A.locator('#stayHint').isVisible(), 'nothing says Back before Leaving makes a one-day stay');
 await A.fill('[data-b="to"]', iso(later));
+assert.equal(await A.locator('#stayHint').isVisible(), false, 'the one-day note stayed with Back after Leaving');
 await A.fill('[data-b="sitter"]', 'Jess');
 await A.locator('[data-b="sitter"]').dispatchEvent('change');
 await A.fill('[data-b="owner.name"]', 'Alex');

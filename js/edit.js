@@ -49,6 +49,7 @@ function basics(s) {
         ${field('Leaving', 'from', s.from, { type: 'date' })}
         ${field('Back', 'to', s.to, { type: 'date' })}
       </div>
+      <p class="hint stay-hint" id="stayHint" hidden>Back is before Leaving, so it’s a one-day stay.</p>
       ${field('Who’s looking after things', 'sitter', s.sitter, { ph: 'Their first name (optional)', max: 60 })}
       <div class="row2">
         ${field('Your name', 'owner.name', s.owner.name, { ph: 'Alex', max: 60 })}
@@ -56,6 +57,14 @@ function basics(s) {
       </div>
       ${field('Where you’ll be', 'away', s.away, { area: true, ph: 'At my sister’s in Tucson, two hours behind. Text first.', max: 400 })}
     </section>`;
+}
+
+// Back can't be picked before Leaving. A date typed in by hand still can be, so say what that does.
+function stayDates(s) {
+  const back = app.querySelector('[data-b="to"]');
+  if (!back) return;
+  back.min = M.isISO(s.from) ? s.from : '';
+  app.querySelector('#stayHint').hidden = !(M.isISO(s.from) && M.isISO(s.to) && s.to < s.from);
 }
 
 function chargeCard(s, c) {
@@ -247,6 +256,7 @@ function draw(s) {
     <datalist id="roles">${M.CONTACT_ROLES.map(r => `<option value="${esc(r)}">`).join('')}</datalist>
     ${Object.entries(M.KINDS).map(([k, v]) => `<datalist id="labels-${k}">${v.labels.map(l => `<option value="${esc(l)}">`).join('')}</datalist>`).join('')}`;
   app.querySelectorAll('textarea').forEach(fit);
+  stayDates(s);
   if (focusNext) {
     const el = app.querySelector(focusNext);
     focusNext = '';
@@ -289,6 +299,7 @@ export function edit(s) {
     obj[key] = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     fit(e.target);
     if (path === 'title') document.getElementById('etitle').textContent = e.target.value || 'New care sheet';
+    if (path === 'from' || path === 'to') stayDates(current);
     saveSoon();
   };
   on({

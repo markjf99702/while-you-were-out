@@ -234,6 +234,7 @@ main { max-width: 720px; margin: 0 auto; padding: 18px 16px 120px; outline: none
 .field.inline input { width: auto; }
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px; }
 .row2 > * { min-width: 0; }
+.stay-hint { margin-top: -4px; }
 input::placeholder, textarea::placeholder { color: color-mix(in srgb, var(--muted) 75%, transparent); }
 
 .charge { border: 1px solid var(--line-2); border-radius: 14px; padding: 12px; margin: 0 0 14px; background: color-mix(in srgb, var(--bg) 55%, var(--card)); }
