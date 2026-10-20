@@ -201,6 +201,14 @@ function newDay() {
 window.addEventListener('pageshow', newDay);
 window.addEventListener('focus', newDay);
 setInterval(newDay, 60000);
+
+// The sheet's tabs stick just under the top bar, which takes two lines on a narrow phone or with larger text,
+// so its height is measured rather than assumed.
+const bar = document.querySelector('.bar');
+if (bar && typeof ResizeObserver === 'function') {
+  new ResizeObserver(() => document.documentElement.style.setProperty('--bar-h', `${bar.getBoundingClientRect().height}px`)).observe(bar);
+}
+
 route();
 
 if ('serviceWorker' in navigator && !('single' in document.documentElement.dataset) && location.protocol !== 'file:') {

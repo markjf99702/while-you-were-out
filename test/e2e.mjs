@@ -25,8 +25,8 @@ const base = `http://localhost:${server.address().port}/`;
 
 const browser = await pw.chromium.launch();
 const problems = [];
-async function phone(who) {
-  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, hasTouch: true });
+async function phone(who, { width = 390, height = 844 } = {}) {
+  const ctx = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 2, hasTouch: true });
   const page = await ctx.newPage();
   page.on('pageerror', e => problems.push(`${who}: ${e.message}`));
   page.on('console', m => { if (m.type() === 'error') problems.push(`${who}: ${m.text()}`); });
@@ -457,6 +457,22 @@ await A.goto(base);
 await A.click('text=See an example');
 await A.waitForSelector('.job');
 assert.equal(await A.evaluate(() => wywo.store.mine().filter(s => s.title === 'Biscuit, Olive and the house').length), 1, 'See an example again opens the same one');
+
+// On a small phone the top bar takes two lines, and the sheet's tabs stick below it instead of sliding under it.
+{
+  const small = await phone('Small phone', { width: 320, height: 640 });
+  const P = small.page;
+  await P.goto(`${base}#/example`);
+  await P.waitForSelector('.job');
+  await P.evaluate(() => document.fonts.ready);
+  await P.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+  await P.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
+  const [barBottom, tabsTop] = await P.evaluate(() => [document.querySelector('.bar').getBoundingClientRect().bottom, document.querySelector('.tabs').getBoundingClientRect().top]);
+  assert.ok(barBottom > 70, `the top bar is on one line at 320 wide (it ends at ${barBottom}px), so this checks nothing`);
+  assert.ok(Math.abs(tabsTop - barBottom) < 1, `the tabs stick at ${tabsTop}px, and the top bar ends at ${barBottom}px`);
+  await fits(P, 'a 320-wide phone');
+  await small.ctx.close();
+}
 
 // Without JavaScript the page says what it needs, where the sheet would be, not under the footer.
 {

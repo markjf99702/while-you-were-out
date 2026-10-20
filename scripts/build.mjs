@@ -44,10 +44,12 @@ const fragment = html
   .replace(/<meta charset[^>]*>\s*/i, '')
   .replace(/<meta name="viewport"[^>]*>\s*/i, '');
 
-// That host pads the page clear of a phone's notch itself, so the sticky bar sits below the padding instead of adding its own.
+// That host pads the page clear of a phone's notch itself, so the sticky bar sits below the padding instead of adding its own,
+// and the tabs stick below the bar.
 const embedded = fragment
   .replace('position: sticky; top: 0; z-index: 10;', 'position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10;')
-  .replace('padding: calc(10px + env(safe-area-inset-top)) ', 'padding: 10px ');
+  .replace('padding: calc(10px + env(safe-area-inset-top)) ', 'padding: 10px ')
+  .replace('top: var(--bar-h, calc(56px + env(safe-area-inset-top)));', 'top: calc(env(safe-area-inset-top, 0px) + var(--bar-h, 56px));');
 
 await mkdir(new URL('dist/', root), { recursive: true });
 await writeFile(new URL('dist/while-you-were-out.html', root), html);
