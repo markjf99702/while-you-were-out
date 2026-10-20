@@ -228,6 +228,8 @@ assert.deepEqual(await J.evaluate(() => {
   return [document.querySelector('#slipFrom').maxLength - kept.from.length, document.querySelector('#slipMsg').maxLength - kept.msg.length];
 }), [0, 0], 'the note’s boxes stop where the note does');
 assert.deepEqual(await J.locator('.slip-done li span').allTextContents(), ['Breakfast, Biscuit']);
+const tickedAt = await contrastOn(J, '.slip-done li i', 'var(--slip)');
+assert.ok(tickedAt >= 4.5, `the time a job was ticked off reads at ${tickedAt.toFixed(2)}:1 on the pink`);
 await J.fill('#slipFrom', 'Jess');
 await J.check('[data-mark="well"]', { force: true });
 await J.fill('#slipMsg', 'He did his sit for a treat. All good here.');

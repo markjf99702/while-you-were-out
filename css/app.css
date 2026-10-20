@@ -450,7 +450,7 @@ label.mark { cursor: pointer; }
 .slip-done ul { list-style: none; margin: 2px 0 0; padding: 0; font-size: 1.35rem; line-height: 1.2; }
 .slip-done li { display: flex; align-items: baseline; gap: 6px; }
 .slip-done li .tick { flex: none; width: 18px; height: 18px; align-self: center; }
-.slip-done li i { margin-left: auto; font-style: normal; font-size: 1.1rem; opacity: .75; white-space: nowrap; }
+.slip-done li i { margin-left: auto; font-style: normal; font-size: 1.1rem; opacity: .85; white-space: nowrap; }
 .slip-done .faint { margin: 2px 0 0; opacity: .85; font-size: 1.3rem; }
 .slip-msg { padding: 10px 0 0; }
 .slip-msg p, .slip-msg textarea {
