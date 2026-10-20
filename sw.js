@@ -15,10 +15,11 @@ self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
 });
 
-// Every project on junkdrawer.works shares this origin's caches, so clear out only this one's old copies.
+// Every project on junkdrawer.works shares this origin's caches, so clear out only this one's old copies,
+// by their exact name: a project called while-you-were-out-something would start with the same words.
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys()
-    .then(keys => Promise.all(keys.filter(k => k.startsWith('while-you-were-out-') && k !== CACHE).map(k => caches.delete(k))))
+    .then(keys => Promise.all(keys.filter(k => k !== CACHE && /^while-you-were-out-v[0-9]+$/.test(k)).map(k => caches.delete(k))))
     .then(() => self.clients.claim()));
 });
 

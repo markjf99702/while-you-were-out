@@ -155,9 +155,10 @@ await closeSheet(A);
 // ---------- Jess opens it ----------
 const jess = await phone('Jess');
 const J = jess.page;
-// The other projects on junkdrawer.works keep their offline copies in this origin's caches too.
+// The other projects on junkdrawer.works keep their offline copies in this origin's caches too,
+// including one whose name starts with this one's.
 await J.goto(`${base}icon.svg`);
-await J.evaluate(() => Promise.all(['on-balance-v1', 'while-you-were-out-v0'].map(name => caches.open(name))));
+await J.evaluate(() => Promise.all(['on-balance-v1', 'while-you-were-out-x-v1', 'while-you-were-out-v0'].map(name => caches.open(name))));
 await J.goto(sheetUrl);
 await J.waitForSelector('.job');
 await J.evaluate(() => document.fonts.ready);
@@ -407,7 +408,8 @@ assert.equal(await A.evaluate(() => wywo.store.mine().filter(s => s.title === 'B
 await J.waitForFunction(() => navigator.serviceWorker?.controller, null, { timeout: 15000 });
 const cacheNames = await J.evaluate(() => caches.keys());
 assert.ok(cacheNames.includes('on-balance-v1'), `another project's offline copy survives: ${cacheNames}`);
-assert.ok(!cacheNames.includes('while-you-were-out-v0') && cacheNames.some(k => k.startsWith('while-you-were-out-')), `only this one's old copy is cleared: ${cacheNames}`);
+assert.ok(cacheNames.includes('while-you-were-out-x-v1'), `a project named like a longer version of this one keeps its copy: ${cacheNames}`);
+assert.ok(!cacheNames.includes('while-you-were-out-v0') && cacheNames.some(k => /^while-you-were-out-v[1-9][0-9]*$/.test(k)), `only this one's old copy is cleared: ${cacheNames}`);
 // No signal at all: the server goes away and the page loads again from scratch, from the service worker's copy.
 await J.goto(`${base}#/v/${sheetId}/today`);
 await J.waitForSelector('.job');
