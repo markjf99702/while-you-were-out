@@ -79,3 +79,18 @@ test('a backup counts the notes it brings back as well as sheets, and ticks come
   assert.deepEqual(store.ticks(a.id, '2026-10-13'), { t1: 5 });
   assert.equal(store.restore(JSON.stringify(backup)).changed, false, 'ticks already here aren’t new');
 });
+
+test('Got it stays said through a reload, an updated link and a newer copy in a backup, and isn’t an edit', () => {
+  left({ sheets: [] });
+  const { mine, ...theirs } = { ...sheet('From Alex'), updated: 1000 };
+  store.receive(structuredClone(theirs));
+  store.gotIt(theirs.id);
+  store.reload();
+  assert.equal(store.get(theirs.id).got.intro, 1);
+  assert.equal(store.get(theirs.id).updated, 1000, 'it would make an update from Alex look older');
+  assert.equal(store.receive({ ...structuredClone(theirs), updated: 2000 }).status, 'updated');
+  assert.equal(store.get(theirs.id).got.intro, 1);
+  store.restore(JSON.stringify({ app: 'while-you-were-out', sheets: [{ ...structuredClone(theirs), updated: 3000, got: { at: 1 } }] }));
+  assert.equal(store.get(theirs.id).updated, 3000);
+  assert.equal(store.get(theirs.id).got.intro, 1);
+});

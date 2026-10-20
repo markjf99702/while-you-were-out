@@ -126,6 +126,14 @@ test('a sheet goes through a link and comes back the same, minus what only matte
   }
 });
 
+test('a sitter’s Got it is kept in their save and never goes in a link, and old saves just lack it', async () => {
+  const s = { ...M.cleanSheet(M.forLink(makeExample(noon('2026-10-05')))), got: { at: 5, intro: 1 } };
+  assert.deepEqual(M.cleanSheet(s).got, { at: 5, intro: 1 });
+  assert.deepEqual(M.cleanSheet({ ...s, got: { at: 5 } }).got, { at: 5 }, 'a save from before Got it was kept');
+  assert.equal(M.forLink(s).got, undefined);
+  assert.equal((await readSheet((await sheetLink(s)).split('#/s/')[1])).got, undefined);
+});
+
 test('links still open when they were made without squeezing, and broken ones say so', async () => {
   const plain = 'j' + Buffer.from(JSON.stringify({ id: 'abc', title: 'Hi' })).toString('base64url');
   assert.equal((await readSheet(plain)).title, 'Hi');

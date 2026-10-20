@@ -177,6 +177,11 @@ await J.goto(sheetUrl);
 await J.waitForSelector('.job');
 await J.evaluate(() => document.fonts.ready);
 assert.match(await J.textContent('.intro'), /Alex sent you this/);
+// Got it puts that away on this phone for good, not only until a day with nothing ticked yet.
+await J.click('[data-act="intro-ok"]');
+await J.reload();
+await J.waitForSelector('.job');
+assert.equal(await J.locator('.intro').count(), 0, 'the note at the top came back');
 assert.match(await J.textContent('.sheet-head'), /From Alex/);
 assert.equal(await J.locator('.owner-bar').count(), 0, 'no Edit or Send for the sitter');
 const todayJobs = await J.locator('.job .job-top b').allTextContents();

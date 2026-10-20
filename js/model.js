@@ -215,7 +215,12 @@ export function cleanSheet(raw = {}) {
   s.updated = Number(raw.updated) || s.created;
   if (!raw.mine) delete s.mine;
   if (raw.mine && raw.example) s.example = true; // only ever your own copy of the example
-  if (raw.got) s.got = { at: Number(raw.got.at) || Date.now() };
+  // got is only on a sitter's copy, and only on their device: when it arrived, and whether they've said
+  // Got it to the note at the top of it.
+  if (raw.got) {
+    s.got = { at: Number(raw.got.at) || Date.now() };
+    if (raw.got.intro) s.got.intro = 1;
+  }
   s.title = str(raw.title, 120);
   s.from = isISO(raw.from) ? raw.from : '';
   s.to = isISO(raw.to) ? raw.to : '';

@@ -75,8 +75,18 @@ export const store = {
     if (have && (have.updated || 0) > (sheet.updated || 0)) return { sheet: have, status: 'older' };
     if (have && (have.updated || 0) === (sheet.updated || 0)) return { sheet: have, status: 'same' }; // the same link again
     sheet.got = { at: Date.now() };
+    if (have?.got?.intro) sheet.got.intro = 1; // Got it, said to the earlier copy, still stands
     store.put(sheet, { touch: false });
     return { sheet, status: have ? 'updated' : 'new' };
+  },
+
+  // The sitter said Got it to the note at the top of their copy. It stays said on this device. It isn't an edit,
+  // so the sheet keeps the time its owner sent it with, which is what says which of two links is newer.
+  gotIt(id) {
+    const s = store.get(id);
+    if (!s) return;
+    s.got = { ...s.got, intro: 1 };
+    write();
   },
 
   // Ticks: sheet id → day → task id → when it was ticked.
@@ -119,7 +129,11 @@ export const store = {
     const loaded = { sheets: 0, notes: 0, changed: false };
     for (const s of sheets) {
       const have = store.get(s.id);
-      if (!have) { state.sheets.push(s); loaded.sheets++; } else if (s.updated > have.updated) { Object.assign(have, s); loaded.sheets++; }
+      if (!have) { state.sheets.push(s); loaded.sheets++; } else if (s.updated > have.updated) {
+        if (have.got?.intro) s.got = { ...s.got, intro: 1 }; // Got it, said here, still stands
+        Object.assign(have, s);
+        loaded.sheets++;
+      }
     }
     for (const [id, days] of Object.entries(isObj(data.ticks) ? data.ticks : {})) {
       if (!isObj(days)) continue;

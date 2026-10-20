@@ -60,7 +60,7 @@ export function view(s, tab = 'today', dayArg = '') {
           <p>Point another phone’s camera at this to join the Wi-Fi.</p>
           <div class="qr-big">${qrSVG(M.wifiCode(s.wifi), { label: `Wi-Fi code for ${s.wifi.name}` })}</div>
           <p class="sheet-foot"><span></span><button type="button" class="link-btn" data-close>Close</button></p>`);
-      else if (act === 'intro-ok') { b.closest('.intro').remove(); }
+      else if (act === 'intro-ok') { b.closest('.intro').remove(); store.gotIt(s.id); }
     },
   });
 }
@@ -79,7 +79,7 @@ function today(s, day, days) {
   const n = tasks.filter(t => ticks[t.id]).length;
   const i = days.indexOf(day);
   const todayIso = M.todayISO();
-  const fresh = !s.mine && !Object.keys(store.ticks(s.id, day)).length && !store.slips(s.id).some(x => x.dir === 'out');
+  const fresh = !s.mine && !s.got?.intro && !Object.keys(store.ticks(s.id, day)).length && !store.slips(s.id).some(x => x.dir === 'out');
   return `
     ${fresh ? `
       <div class="intro">
