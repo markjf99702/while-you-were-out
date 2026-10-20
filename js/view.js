@@ -97,11 +97,12 @@ function today(s, day, days) {
     ${tasks.length ? M.tasksBySlot(tasks).map(g => `
       <section class="slot">
         <h3>${g.name}</h3>
-        ${g.tasks.map(t => job(s, t, ticks[t.id])).join('')}
+        ${g.tasks.map(t => job(s, t, ticks[t.id], day === todayIso)).join('')}
       </section>`).join('') : `<p class="empty-line">Nothing on the list for this day.${s.mine ? ` <a href="#/e/${s.id}">Add the jobs</a>.` : ''}</p>`}`;
 }
 
-function job(s, t, done) {
+// A job on particular dates only says so: Today only when the day showing is today, This day only on any other.
+function job(s, t, done, isToday) {
   const w = M.whoOf(s, t.who);
   const once = t.days.some(d => typeof d === 'string') && !t.days.some(d => typeof d === 'number');
   return `
@@ -109,7 +110,7 @@ function job(s, t, done) {
       <input type="checkbox" data-tick="${t.id}"${done ? ' checked' : ''}>
       <span class="job-box" aria-hidden="true"></span>
       <span class="job-main">
-        <span class="job-top"><b>${esc(t.what)}</b>${w ? `<span class="job-who">${esc(w.emoji)} ${esc(w.name)}</span>` : t.who === 'house' ? '<span class="job-who">🏠 House</span>' : ''}${once ? '<span class="tag">Today only</span>' : ''}</span>
+        <span class="job-top"><b>${esc(t.what)}</b>${w ? `<span class="job-who">${esc(w.emoji)} ${esc(w.name)}</span>` : t.who === 'house' ? '<span class="job-who">🏠 House</span>' : ''}${once ? `<span class="tag">${isToday ? 'Today only' : 'This day only'}</span>` : ''}</span>
         ${t.detail ? `<span class="job-detail">${esc(t.detail)}</span>` : ''}
         <span class="job-when">${done ? `Done ${M.clockOf(done)}` : ''}</span>
       </span>

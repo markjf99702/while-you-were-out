@@ -406,6 +406,21 @@ await A.waitForSelector('.day-strip a:last-child[aria-current]');
 assert.ok(await chipInView(), 'the last day, once tapped, is out of sight');
 await A.evaluate(id => wywo.store.remove(id), longId);
 
+// A job on one date says Today only when it's today's, and This day only on a day ahead.
+const [onceId, nextDay] = await A.evaluate(() => {
+  const { M, store } = wywo, s = M.blankSheet(), day = M.todayISO(), next = M.addDays(day, 1);
+  Object.assign(s, { title: 'Once', from: day, to: next, tasks: [{ ...M.newTask('morning', '', 'Heartworm chew'), days: [day] }, { ...M.newTask('evening', '', 'Bins out'), days: [next] }] });
+  store.put(s);
+  return [s.id, next];
+});
+await A.goto(`${base}#/v/${onceId}/today`);
+await A.waitForSelector('.job:has-text("Heartworm chew")');
+assert.equal(await A.textContent('.job .tag'), 'Today only');
+await A.goto(`${base}#/v/${onceId}/today/${nextDay}`);
+await A.waitForSelector('.job:has-text("Bins out")');
+assert.equal(await A.textContent('.job .tag'), 'This day only', 'a job on a day ahead says it’s for today');
+await A.evaluate(id => wywo.store.remove(id), onceId);
+
 // The example opens with a note already there.
 await A.goto(`${base}#/example`);
 await A.waitForSelector('.job');
